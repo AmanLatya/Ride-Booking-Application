@@ -96,3 +96,53 @@ curl -X POST http://localhost:2000/users/register \
     "password": "yourpassword"
   }'
 ```
+
+## Example Success Response
+
+**Status:** 201 Created
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "665f1e2b7c1a2b0012a34567",
+    "fullName": {
+      "firstName": "$2b$07$k1j2h3l4m5n6o7p8q9r0s.",
+      "lastName": "$2b$07$z8x7c6v5b4n3m2l1k0j9h."
+    },
+    "email": "$2b$07$e1m2a3i4l5h6a7s8h9e0d.",
+    "password": "$2b$10$abcdefg1234567890hijklmnopqrs",
+    "socketID": null,
+    "__v": 0
+  }
+}
+```
+
+---
+
+## Example Validation Error Response
+
+**Status:** 400 Bad Request
+
+```json
+{
+  "errors": [
+    {
+      "msg": "Invalid Email",
+      "param": "email",
+      "location": "body"
+    }
+  ]
+}
+```
+
+---
+
+## Example Missing Fields Response
+
+**Status:** 400 Bad Request
+
+```json
+{
+  "message": "All Fields required"
+}
