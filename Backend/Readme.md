@@ -1,16 +1,27 @@
-# User Registration API
+# User API Documentation
 
-## Endpoint
+## Endpoints
 
-`POST /users/register`
-
-## Description
-
-Registers a new user. Validates input, hashes sensitive fields, and returns a JWT token on success.
+- `POST /users/register` — Register a new user
+- `POST /users/login` — Login with email and password
+- `GET /users/profile` — Get the authenticated user's profile
+- `POST /users/logout` — Logout the current user
 
 ---
 
-## Request Body
+## User Registration
+
+### Endpoint
+
+`POST /users/register`
+
+### Description
+
+Registers a new user. Validates input, hashes the password, and returns a JWT token on success.
+
+---
+
+### Request Body
 
 Send as JSON:
 
@@ -25,7 +36,7 @@ Send as JSON:
 }
 ```
 
-### Field Requirements
+#### Field Requirements
 
 - `fullName.firstName`: **required**, string, min 3 chars
 - `fullName.lastName`: optional, string, min 3 chars if provided
@@ -34,9 +45,9 @@ Send as JSON:
 
 ---
 
-## Responses
+### Responses
 
-### Success
+#### Success
 
 - **201 Created**
 - Body:
@@ -46,10 +57,10 @@ Send as JSON:
     "user": {
       "_id": "<user_id>",
       "fullName": {
-        "firstName": "<hashed_first_name>",
-        "lastName": "<hashed_last_name>"
+        "firstName": "<first_name>",
+        "lastName": "<last_name>"
       },
-      "email": "<hashed_email>",
+      "email": "<email>",
       "password": "<hashed_password>",
       "socketID": null,
       "__v": 0
@@ -57,7 +68,7 @@ Send as JSON:
   }
   ```
 
-### Validation Error
+#### Validation Error
 
 - **400 Bad Request**
 - Body:
@@ -73,7 +84,7 @@ Send as JSON:
   }
   ```
 
-### Missing Fields
+#### Missing Fields
 
 - **400 Bad Request**
 - Body:
@@ -85,7 +96,7 @@ Send as JSON:
 
 ---
 
-## Example Request
+### Example Request
 
 ```sh
 curl -X POST http://localhost:2000/users/register \
@@ -97,7 +108,9 @@ curl -X POST http://localhost:2000/users/register \
   }'
 ```
 
-## Example Success Response
+### Example Response
+
+#### /users/register
 
 **Status:** 201 Created
 
@@ -107,10 +120,10 @@ curl -X POST http://localhost:2000/users/register \
   "user": {
     "_id": "665f1e2b7c1a2b0012a34567",
     "fullName": {
-      "firstName": "$2b$07$k1j2h3l4m5n6o7p8q9r0s.",
-      "lastName": "$2b$07$z8x7c6v5b4n3m2l1k0j9h."
+      "firstName": "John",
+      "lastName": "Doe"
     },
-    "email": "$2b$07$e1m2a3i4l5h6a7s8h9e0d.",
+    "email": "john.doe@example.com",
     "password": "$2b$10$abcdefg1234567890hijklmnopqrs",
     "socketID": null,
     "__v": 0
@@ -120,29 +133,228 @@ curl -X POST http://localhost:2000/users/register \
 
 ---
 
-## Example Validation Error Response
+## User Login
 
-**Status:** 400 Bad Request
+### Endpoint
+
+`POST /users/login`
+
+### Description
+
+Authenticates a user using email and password. Returns a JWT token and user data on success.
+
+---
+
+### Request Body
+
+Send as JSON:
 
 ```json
 {
-  "errors": [
-    {
-      "msg": "Invalid Email",
-      "param": "email",
-      "location": "body"
+  "email": "john.doe@example.com",
+  "password": "yourpassword"
+}
+```
+
+#### Field Requirements
+
+- `email`: **required**, valid email
+- `password`: **required**, string, min 6 chars
+
+---
+
+### Responses
+
+#### Success
+
+- **200 OK**
+- Body:
+  ```json
+  {
+    "token": "<jwt_token>",
+    "user": {
+      "_id": "<user_id>",
+      "fullName": {
+        "firstName": "<first_name>",
+        "lastName": "<last_name>"
+      },
+      "email": "<email>",
+      "password": "<hashed_password>",
+      "socketID": null,
+      "__v": 0
     }
-  ]
+  }
+  ```
+
+#### Validation Error
+
+- **400 Bad Request**
+- Body:
+  ```json
+  {
+    "errors": [
+      {
+        "msg": "Error message",
+        "param": "field",
+        "location": "body"
+      }
+    ]
+  }
+  ```
+
+#### Invalid Credentials
+
+- **401 Unauthorized**
+- Body:
+  ```json
+  {
+    "message": "Invalid email or password"
+  }
+  ```
+
+---
+
+### Example Request
+
+```sh
+curl -X POST http://localhost:2000/users/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "yourpassword"
+  }'
+```
+
+### Example Response
+
+#### /users/login
+
+**Status:** 200 OK
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "665f1e2b7c1a2b0012a34567",
+    "fullName": {
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "email": "john.doe@example.com",
+    "password": "$2b$10$abcdefg1234567890hijklmnopqrs",
+    "socketID": null,
+    "__v": 0
+  }
 }
 ```
 
 ---
 
-## Example Missing Fields Response
+## Get User Profile
 
-**Status:** 400 Bad Request
+### Endpoint
 
-```json
-{
-  "message": "All Fields required"
-}
+`GET /users/profile`
+
+### Description
+
+Returns the authenticated user's profile information. Requires a valid JWT token in the `Authorization` header or as a cookie.
+
+---
+
+### Headers
+
+- `Authorization: Bearer <jwt_token>` (if not using cookies)
+
+---
+
+### Responses
+
+#### Success
+
+- **200 OK**
+- Body:
+  ```json
+  {
+    "user": {
+      "_id": "<user_id>",
+      "fullName": {
+        "firstName": "<first_name>",
+        "lastName": "<last_name>"
+      },
+      "email": "<email>",
+      "socketID": null,
+      "__v": 0
+    }
+  }
+  ```
+
+#### Unauthorized
+
+- **401 Unauthorized**
+- Body:
+  ```json
+  {
+    "message": "Unauthorized: No token provided"
+  }
+  ```
+
+---
+
+### Example Request
+
+```sh
+curl -X GET http://localhost:2000/users/profile \
+  -H "Authorization: Bearer <jwt_token>"
+```
+
+---
+
+## User Logout
+
+### Endpoint
+
+`GET /users/logout`
+
+### Description
+
+Logs out the current user by invalidating the JWT token (adds it to a blacklist). Requires authentication.
+
+---
+
+### Headers
+
+- `Authorization: Bearer <jwt_token>` (if not using cookies)
+
+---
+
+### Responses
+
+#### Success
+
+- **200 OK**
+- Body:
+  ```json
+  {
+    "message": "Logged out successfully"
+  }
+  ```
+
+#### Unauthorized
+
+- **401 Unauthorized**
+- Body:
+  ```json
+  {
+    "message": "Unauthorized: No token provided"
+  }
+  ```
+
+---
+
+### Example Request
+
+```sh
+curl -X POST http://localhost:2000/users/logout \
+  -H "Authorization: Bearer <jwt_token>"
+```

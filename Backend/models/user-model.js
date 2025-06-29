@@ -29,11 +29,11 @@ const userSchema = new mongoose.Schema({
 })
 
 userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({ _id: this._id }, process.env.JWT_TOKEN)
+    const token = jwt.sign({ _id: this._id }, process.env.JWT_TOKEN);
     return token;
 }
 
-userSchema.methods.comparePassword = async function (password) {
+userSchema.methods.compareHashedDetails = async function (password) {
     return await bcrypt.compare(password, this.password)
 }
 
@@ -41,7 +41,7 @@ userSchema.statics.hashPassword = async function (password) {
     return await bcrypt.hash(password, 10);
 }
 
-userSchema.statics.encrypt = async function (dataArray) {
+userSchema.statics.hashDetails = async function (dataArray) {
     if (!Array.isArray(dataArray)) {
         throw new Error("encrypt expects an array");
     }
@@ -57,3 +57,5 @@ userSchema.statics.encrypt = async function (dataArray) {
 const userModel = mongoose.model('user', userSchema);
 
 module.exports = userModel;
+
+
