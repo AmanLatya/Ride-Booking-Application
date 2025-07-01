@@ -10,28 +10,28 @@ async function handleUserRegister(req, res, next) {
         return res.status(400).json({ errors: error.array() });
     }
     const { fullName, email, password } = req.body;
+    const isEmailExists = await userModel.findOne({ email });
+    if (isEmailExists) {
+        return res.status(400).json({ message: "User already exists" });
+    }
 
-    console.log(req.body);
-    // const [hashedFirstName, hashedLastName, hashedEmail] = await userModel.hashDetails([
-    //     fullName.firstName,
-    //     fullName.lastName,
-    //     email
-    // ]);
+    try{
 
-    const hashedPassword = await userModel.hashPassword(password);
-    const user = await userServices.createUser({
-        // firstName: hashedFirstName,
-        // lastName: hashedLastName,
-        firstName: fullName.firstName,
-        lastName: fullName.lastName,
-        // email: hashedEmail,
-        email,
-        password: hashedPassword
-    })
+        const hashedPassword = await userModel.hashPassword(password);
+        const user = await userServices.createUser({
+            firstName: fullName.firstName,
+            lastName: fullName.lastName,
+            email,
+            password: hashedPassword
+        })
+    
+        const token = await user.generateAuthToken();
+        res.status(201).json({ token, user })
+    }catch (err) {
+        // console.error("Error during user registration:", err);
+        res.status(500).json({ message: err.message });
+    }
 
-    const token = await user.generateAuthToken();
-
-    res.status(201).json({ token, user })
 }
 
 async function handleUserLogin(req, res, next) {
@@ -51,19 +51,26 @@ async function handleUserLogin(req, res, next) {
     }
 
     const token = await user.generateAuthToken();
-    res.cookie('token', token)
-    res.status(200).json({ token, user });
+    res.cookie('userToken', token)
+    res.status(200).json({msg: "Login successful", token, user });
 }
 
 async function handleGetUserProfile(req, res, next) {
     const user = req.user;
-    console.log("User profile:", user);
-    res.status(200).json({ user });
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+    // console.log("User profile:", user);
+    res.status(200).json({Profile: "User Profile", user });
 };
 
 async function handleUserLogout(req, res, next) {
-    res.clearCookie('token');
+    const user = req.user;
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
     const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
+    res.clearCookie('userToken');
     if (!token) {
         return res.status(401).json({ message: "Unauthorized: No token provided" });
     }
