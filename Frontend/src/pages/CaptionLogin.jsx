@@ -1,26 +1,43 @@
-import React, { use, useState } from "react";
-import { Link } from "react-router-dom";
-
+import React, { use, useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { CaptionDataContext } from "../context/captionContext";
 
 const CaptionLogin = () => {
 
+  const captionToken = localStorage.getItem("captionToken");
+  const navigate = useNavigate();
+  useEffect(() =>{
+    if(captionToken){
+      navigate("/caption-home");
+    }
+  },[captionToken, navigate]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [captionData, setCaptionData] = useState({});
 
-  const handleSubmit = (e) => {
+  const {caption, setCaption} = useContext(CaptionDataContext);
+
+
+  const handleSubmit = async(e) => {
     e.preventDefault();
     const data = {
       email: email,
       password: password
     }
-    setCaptionData(data)
-    // Here you would typically handle the login logic, such as sending a request to your backend.
-    console.log("Email:", email);
-    console.log("Password:", password);
+
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captions/login`, data);
+    
+
+    if(response.status === 200){
+      const data = response.data;
+      setCaption(data.caption);
+      localStorage.setItem("captionToken", data.token);
+      console.log("Caption logged in successfully:", data);
+      navigate("/caption-home");
+    }
     setEmail("");
     setPassword("");
-    console.log("User Data:", captionData);
   };
 
   return (

@@ -4,14 +4,16 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import UserContext from './context/userContext.jsx'
+import CaptionContext from './context/captionContext.jsx' // ✅ Use default export
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <UserContext>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <CaptionContext> {/* ✅ Correct wrapper */}
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </CaptionContext>
     </UserContext>
-  </StrictMode>,
+  </StrictMode>
 )
-

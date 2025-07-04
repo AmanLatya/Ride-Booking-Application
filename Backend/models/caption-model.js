@@ -18,7 +18,7 @@ const captionSchema = new mongoose.Schema({
         type: String,
         required: true,
         match: [/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Please fill a valid email address'],
-        minlength: [11, 'Email must be at least 5 characters'],
+        minlength: [5, 'Email must be at least 5 characters'],
         unique: true,
         lowercase: true,
     },
@@ -36,20 +36,15 @@ const captionSchema = new mongoose.Schema({
         default: 'inactive'
     },
     vehicle:{
-        color:{
-            type: String,
-            required: true,
-            minlength: [3, 'Color must be at least 3 characters']
-        },
         vehicleNumber:{
             type: String,
             required: true,
-            minlength: [10, 'Vehicle Number must be at least 3 characters']
+            minlength: [4, 'Vehicle Number must be at least 3 characters']
         },
         vehicleType:{
             type: String,
             required: true,
-            enum: ['car', 'bike', 'bus'],
+            enum: ['car', 'bike', 'auto'],
             default: 'car'
         }
     },

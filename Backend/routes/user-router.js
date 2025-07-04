@@ -12,7 +12,7 @@ router.post("/register",[
 ],userController.handleUserRegister)
 
 
-router.get("/login",[
+router.post("/login",[
     body('email').isEmail().withMessage("Invalid Email"),
     body('password').isLength({min : 6}).withMessage("Password Must be at least 6 characters long")
 ],userController.handleUserLogin)

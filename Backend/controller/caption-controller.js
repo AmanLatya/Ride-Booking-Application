@@ -22,7 +22,7 @@ module.exports.handleCaptionRegister = async (req, res, next) => {
             lastName: fullName.lastName,
             email,
             password: hashedPassword,
-            color: vehicle.color,
+            // color: vehicle.color,
             vehicleNumber: vehicle.vehicleNumber,
             vehicleType: vehicle.vehicleType,
         });
@@ -32,6 +32,8 @@ module.exports.handleCaptionRegister = async (req, res, next) => {
         res.status(500).json({ message: err.message });
     }
 }
+
+
 
 module.exports.handleCaptionLogin = async (req,res,next) =>{
     const error = validationResult(req);

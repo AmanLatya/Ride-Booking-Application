@@ -1,26 +1,40 @@
-import React, { use, useState } from "react";
-import { Link } from "react-router-dom";
-
+import React, { use, useState, useContext, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserDataContext } from "../context/userContext";
+import axios from "axios";
 
 const UserLogin = () => {
+    const navigate = useNavigate();
+    const userToken = localStorage.getItem("userToken");
+    useEffect(() => {
+        if (userToken) {
+            navigate("/home");
+        }
+    }, [userToken, navigate]);
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [userData, setUserData] = useState({});
-
-    const handleSubmit = (e) => {
+    // const [userData, setUserData] = useState({});
+    const { user, setUser } = useContext(UserDataContext);
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const data = {
+        const userData = {
             email: email,
             password: password
         }
-        setUserData(data)
+
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData);
+        if (response.status === 200) {
+            const data = response.data;
+            setUser(data.data);
+            localStorage.setItem("userToken", data.token);
+            console.log("User logged in successfully:", data);
+            navigate("/home");
+        }
         // Here you would typically handle the login logic, such as sending a request to your backend.
-        console.log("Email:", email);
-        console.log("Password:", password);
+
         setEmail("");
         setPassword("");
-        console.log("User Data:", data);
     };
 
     return (

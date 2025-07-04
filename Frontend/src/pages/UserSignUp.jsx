@@ -1,31 +1,45 @@
-import React, {use, useState } from "react";
-import { Link } from "react-router-dom";
+import React, {use, useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserDataContext } from "../context/userContext";
+import axios from "axios";
 
 const UserSignUp = () => {
-    const handleSubmit = (e) => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    // const [userData, setUserData] = useState({});
+
+    const {user,setUser} = useContext(UserDataContext);
+    const navigate = useNavigate();
+    const handleSubmit = async(e) => {
         e.preventDefault();
         // handle form submission here
-        const data = {
-            fullname:{
-                firstname: firstname,
-                lastname: lastname,
+        const newUser = {
+            fullName:{
+                firstName: firstName,
+                lastName: lastName,
             },
             email: email,
             password: password,
         }
-        setUserData(data);
+        
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
+
+        if(response.status === 201){
+            const data = response.data;
+            setUser(data.user)
+            console.log("User registered successfully:", response.data);
+            localStorage.setItem("userToken", data.token);
+            navigate("/home");
+        }
+
+        // setUserData(newUser);
         setEmail("");
         setPassword("");
-        setFirstname("");   
-        setLastname("");
-        console.log("User Data:", data);
-        // Here you would typically handle the signup logic, such as sending a request to your backend
+        setFirstName("");   
+        setLastName("");
     };
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [firstname, setFirstname] = useState("");
-    const [lastname, setLastname] = useState("");
-    const [userData, setUserData] = useState({});
 
     return (
         <div className="bg-cover bg-center bg-[url(https://images.unsplash.com/32/Mc8kW4x9Q3aRR3RkP5Im_IMG_4417.jpg?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)] min-h-screen flex items-center justify-center px-4">
@@ -45,9 +59,9 @@ const UserSignUp = () => {
                         </label>
                         <div className="flex space-x-2">
                             <input
-                                value={firstname}
+                                value={firstName}
                                 onChange = {(e) =>{
-                                    setFirstname(e.target.value);
+                                    setFirstName(e.target.value);
                                 }}
                                 type="text"
                                 required
@@ -56,9 +70,9 @@ const UserSignUp = () => {
                             
                             />
                             <input
-                                value={lastname}
+                                value={lastName}
                                 onChange = {(e) =>{
-                                    setLastname(e.target.value);
+                                    setLastName(e.target.value);
                                 }}
                                 type="text"
                                 placeholder="Last Name"
@@ -103,7 +117,7 @@ const UserSignUp = () => {
                         type="submit"
                         className="w-full bg-black text-white py-2 hover:bg-gray-800 transition duration-200"
                     >
-                        Sign Up
+                        Create Account
                     </button>
                 </form>
 
