@@ -9,7 +9,7 @@ router.get('/get-address-coordinates', authMiddleware.authUser,
     mapController.getAddressCoordinates);
 
 router.get('/get-distance-time', authMiddleware.authUser,
-    query('origin').notEmpty().withMessage('Origin is required'),
+    query('pickup').notEmpty().withMessage('pickup is required'),
     query('destination').notEmpty().withMessage('Destination is required'),
     mapController.getDistanceTime);
 

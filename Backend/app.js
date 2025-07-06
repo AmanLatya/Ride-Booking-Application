@@ -27,6 +27,9 @@ app.use("/captions", captionRoutes);
 const mapRoutes = require("./routes/map-router");
 app.use("/maps", mapRoutes);
 
+
+const rideRoutes = require("./routes/ride-router");
+app.use("/rides", rideRoutes)
 // app.set("view engine", "ejs"); // SET View engine - EJS
 // app.set("views", path.resolve("./views")); // SET the Path of Views Files
 

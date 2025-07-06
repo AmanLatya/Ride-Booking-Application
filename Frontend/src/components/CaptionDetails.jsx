@@ -1,14 +1,18 @@
 import React from "react";
 import userImg from "../assets/user.png";
+import { useContext } from "react";
+import { CaptionDataContext } from "../context/captionContext";
 
 const CaptionDetails = () => {
+    const {caption} = useContext(CaptionDataContext);
+
     return (
         <div className="p-4 space-y-5">
             {/* Profile Card */}
             <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex items-center gap-4">
                     <img className="h-14 w-14 object-cover rounded-full border border-gray-300" src={userImg} alt="User" />
-                    <h3 className="text-lg font-semibold text-gray-800">Smith Johnson</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 capitalize">{caption.fullName.firstName + " " + caption.fullName.lastName}</h3>
                 </div>
                 <div className="text-right">
                     <h1 className="text-xl font-bold text-green-600">₹192.52</h1>

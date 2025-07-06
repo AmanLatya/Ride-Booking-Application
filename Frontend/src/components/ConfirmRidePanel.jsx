@@ -1,7 +1,17 @@
 import React from "react";
 import carImg from "../assets/car.png";
+import autoImg from "../assets/Auto.png"
+import bikeImg from "../assets/Bike.webp";
 
 const ConfirmRidePanel = (props) => {
+    console.log(props);
+    console.log("Fare - " , props.fare);
+    const vehicle = props.vehicleType;
+    let img = carImg; 
+    if(vehicle == 'car') img = carImg;
+    else if(vehicle == 'bike') img = bikeImg;
+    else if(vehicle == 'auto') img = autoImg;
+    
     return (
         <div className="py-5 px-4 w-full flex flex-col justify-center items-center gap-4">
             {/* Drag Handle */}
@@ -22,7 +32,7 @@ const ConfirmRidePanel = (props) => {
 
             {/* Vehicle Image */}
             <div className="flex justify-center w-full">
-                <img className="h-40 object-contain" src={carImg} alt="Vehicle" />
+                <img className="h-40 object-contain" src={img} alt="Vehicle" />
             </div>
 
             {/* Pickup Info */}
@@ -31,8 +41,8 @@ const ConfirmRidePanel = (props) => {
                     <i className="ri-user-location-line"></i>
                 </div>
                 <div>
-                    <h2 className="text-lg font-medium text-gray-900">196 D-S-3</h2>
-                    <p className="text-sm text-gray-500">Vijay Nagar, Near Atal Ground.</p>
+                    {/* <h2 className="text-lg font-medium text-gray-900">196 D-S-3</h2> */}
+                    <p className="text-lg ">{props.pickup}</p>
                 </div>
             </div>
 
@@ -42,8 +52,8 @@ const ConfirmRidePanel = (props) => {
                     <i className="ri-map-pin-2-fill"></i>
                 </div>
                 <div>
-                    <h2 className="text-lg font-medium text-gray-900">SGSITS</h2>
-                    <p className="text-sm text-gray-500">Near Railway Station</p>
+                    {/* <h2 className="text-lg font-medium text-gray-900">SGSITS</h2> */}
+                    <p className="text-lg ">{props.destination}</p>
                 </div>
             </div>
 
@@ -53,7 +63,7 @@ const ConfirmRidePanel = (props) => {
                     <i className="ri-wallet-fill"></i>
                 </div>
                 <div>
-                    <h2 className="text-lg font-medium text-gray-900">₹195.56</h2>
+                    <h2 className="text-lg font-medium text-gray-900">₹ {props.fare[vehicle]}</h2>
                     <p className="text-sm text-gray-500">Cash</p>
                 </div>
             </div>
@@ -61,8 +71,9 @@ const ConfirmRidePanel = (props) => {
             {/* Confirm Ride Button */}
             <button
                 onClick={() => {
-                    props.setWaitingDriverPanel(true);
+                    props.setSearchingDriverPanel(true);
                     props.setConfirmRidePanel(false);
+                    props.createRide()
                 }}
                 className="w-full bg-green-500 text-white text-xl font-semibold py-3 rounded-2xl hover:bg-green-600 transition duration-200"
             >

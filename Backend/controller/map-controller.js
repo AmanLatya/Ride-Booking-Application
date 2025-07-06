@@ -20,9 +20,9 @@ module.exports.getDistanceTime = async (req, res ,next) => {
     if (!error.isEmpty()) {
         return res.status(400).json({ errors: error.array() });
     }
-    const { origin, destination } = req.query;
+    const { pickup, destination } = req.query;
     try {
-        const distanceTime = await mapServices.getDistanceTime(origin, destination);
+        const distanceTime = await mapServices.getDistanceTime(pickup, destination);
         res.json(distanceTime);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch distance and duration' });
