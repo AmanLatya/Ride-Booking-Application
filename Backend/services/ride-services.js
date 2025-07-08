@@ -12,12 +12,12 @@ async function generateOTP(digits) {
 }
 
 
-async function getFare(pickup, destination) {
-    if (!pickup && !destination) {
-        throw new Error("Pickup and Destination are required");
+async function getFare(pickupCoords, destinationCoords) {
+    if (!pickupCoords && !destinationCoords) {
+        throw new Error("PickupCoordpickupCoords and DestinationCoorddestinationCoords are required");
     }
 
-    const distanceTime = await mapServices.getDistanceTime(pickup, destination);
+    const distanceTime = await mapServices.getDistanceTime(pickupCoords, destinationCoords);
     const baseFare = {
         auto: 30,
         car: 50,
@@ -48,22 +48,24 @@ async function getFare(pickup, destination) {
 
 module.exports.getFare = getFare;
 
+
+
 module.exports.createRideService = async ({
-    user, pickup, destination, vehicleType
+    user, pickup, destination, vehicleType, rideFare
 }) => {
 
-    if (!user || !pickup || !destination || !vehicleType) {
+    if (!user || !pickup || !destination || !vehicleType || !rideFare) {
         throw new Error('All Fields required');
     }
 
-    const fare = await getFare(pickup, destination);
+    // const fare = await getFare(pickup, destination);
     const ride = rideModel.create({
         user,
         pickup,
         destination,
         vehicleType,
         otp: await generateOTP(6),
-        fare: fare[vehicleType]
+        fare: rideFare
 
     })
     return ride;

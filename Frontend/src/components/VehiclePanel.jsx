@@ -15,6 +15,9 @@ const VehiclePanel = (props) => {
                 <div className="line w-15 h-1 mb-2 bg-gray-300 rounded-full"></div>
             </div>
             <h1 className="text-2xl font-semibold">Choose Vehicle</h1>
+
+
+            {/* CAR */}
             <div 
             onClick={() =>{
                 props.setConfirmRidePanel(true);
@@ -30,6 +33,9 @@ const VehiclePanel = (props) => {
                 </div>
                 <h2 className="font-medium text-xl p-4">₹{props.fare.car}</h2>
             </div>
+
+
+            {/* BIKE */}
             <div 
             onClick={() =>{
                 props.setConfirmRidePanel(true);
@@ -45,6 +51,9 @@ const VehiclePanel = (props) => {
                 </div>
                 <h2 className="font-medium text-xl p-4">₹{props.fare.bike}</h2>
             </div>
+
+
+            {/* AUTO */}
             <div 
             onClick={() =>{
                 props.setConfirmRidePanel(true);

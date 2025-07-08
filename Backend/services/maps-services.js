@@ -1,37 +1,37 @@
 const axios = require('axios');
 
-module.exports.getDistanceTime = async (pickup, destination) => {
-    if (!pickup || !destination) {
+module.exports.getDistanceTime = async (pickupCoords, destinationCoords) => {
+    if (!pickupCoords || !destinationCoords) {
         throw new Error('pickup and destination are required');
     }
 
     const apiKey = process.env.ORS_API_KEY;
 
     try {
-        console.log("🔍 Starting geocoding for pickup:", pickup);
-        const pickupRes = await axios.get(`https://api.openrouteservice.org/geocode/search`, {
-            params: {
-                api_key: apiKey,
-                text: pickup
-            }
-        });
-        console.log("📦 Pickup geocode response:", JSON.stringify(pickupRes.data, null, 2));
+        // console.log("🔍 Starting geocoding for pickup:", pickup);
+        // const pickupRes = await axios.get(`https://api.openrouteservice.org/geocode/search`, {
+        //     params: {
+        //         api_key: apiKey,
+        //         text: pickup
+        //     }
+        // });
+        // console.log("📦 Pickup geocode response:", JSON.stringify(pickupRes.data, null, 2));
 
-        console.log("🔍 Starting geocoding for destination:", destination);
-        const destinationRes = await axios.get(`https://api.openrouteservice.org/geocode/search`, {
-            params: {
-                api_key: apiKey,
-                text: destination
-            }
-        });
-        console.log("📦 Destination geocode response:", JSON.stringify(destinationRes.data, null, 2));
+        // console.log("🔍 Starting geocoding for destination:", destination);
+        // const destinationRes = await axios.get(`https://api.openrouteservice.org/geocode/search`, {
+        //     params: {
+        //         api_key: apiKey,
+        //         text: destination
+        //     }
+        // });
+        // console.log("📦 Destination geocode response:", JSON.stringify(destinationRes.data, null, 2));
 
-        const pickupCoords = pickupRes.data.features[0].geometry.coordinates;
-        const destinationCoords = destinationRes.data.features[0].geometry.coordinates;
+        // const pickupCoords = pickupRes.data.features[0].geometry.coordinates;
+        // const destinationCoords = destinationRes.data.features[0].geometry.coordinates;
 
-        console.log("📍 Coordinates:");
-        console.log("Pickup Coordinates:", pickupCoords);
-        console.log("Destination Coordinates:", destinationCoords);
+        // console.log("📍 Coordinates:");
+        // console.log("Pickup Coordinates:", pickupCoords);
+        // console.log("Destination Coordinates:", destinationCoords);
 
         // Requesting directions from ORS
         console.log("🧭 Fetching directions from ORS...");
@@ -48,7 +48,7 @@ module.exports.getDistanceTime = async (pickup, destination) => {
             }
         );
 
-        console.log("🚗 Directions response:", JSON.stringify(directionsRes.data, null, 2));
+        // console.log("🚗 Directions response:", JSON.stringify(directionsRes.data, null, 2));
 
         const data = directionsRes.data.routes[0].summary;
         const distanceInKm = data.distance / 1000;
@@ -61,7 +61,7 @@ module.exports.getDistanceTime = async (pickup, destination) => {
             durationInMin
         };
 
-        console.log("✅ Final Result:", result);
+        // console.log("✅ Final Result:", result);
         return result;
 
     } catch (err) {

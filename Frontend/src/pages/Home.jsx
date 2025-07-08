@@ -10,6 +10,7 @@ import ConfirmRidePanel from "../components/ConfirmRidePanel";
 import SearchingForDriver from "../components/SearchingForDriver";
 import WaitingDriver from "../components/WaitingDriver";
 import axios from "axios";
+import ErrorPopUp from "../components/ErrorPopUp";
 
 const Home = () => {
     const [pickup, setPickup] = useState("");
@@ -17,13 +18,18 @@ const Home = () => {
     const [panel, setPanel] = useState(false);
     const [vehiclePanel, setVehiclePanel] = useState(false);
     const [confirmRidePanel, setConfirmRidePanel] = useState(false);
-    const [searchingDriverPanel , setSearchingDriverPanel] = useState(false);
+    const [searchingDriverPanel, setSearchingDriverPanel] = useState(false);
     const [waitingDriverPanel, setWaitingDriverPanel] = useState(false);
     const [activeField, setActiveField] = useState(null);
     const [pickupSuggestions, setPickupSuggestions] = useState([]);
     const [destinationSuggestions, setDestinationSuggestions] = useState([])
     const [fare, setFare] = useState(0);
     const [vehicleType, setVehicleType] = useState(null);
+    const [pickupCoords, setPickupCoords] = useState(null);
+    const [destinationCoords, setDestinationCoords] = useState(null);
+    const [errorPopUpPanel, setErrorPopUpPanel] = useState(false);
+    const [error, setError] = useState("");
+
 
 
 
@@ -35,6 +41,7 @@ const Home = () => {
     const confirmRidePanelRef = useRef(null);
     const searchingDriverPanelRef = useRef(null);
     const waitingDriverRef = useRef(null);
+    const errorPopUpPanelRef = useRef(null);
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -91,27 +98,47 @@ const Home = () => {
     }
 
     const handleSetFare = async () => {
-        setVehiclePanel(true);
-        setPanel(false)
-        console.log(currPickup, " - ", currDestination)
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
-            params: { pickup, destination },
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('userToken')}`
-            }
-        })
-        // console.log(response.data)
-        setFare(response.data);
+        console.log(pickupCoords, " - ", destinationCoords);
 
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
+                pickupCoords,
+                destinationCoords
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('userToken')}`
+                }
+            });
+
+            setVehiclePanel(true);
+            setPanel(false);
+            setFare(response.data);
+
+        } catch (err) {
+            console.error("🚨 Error fetching fare:", err);
+
+            // Handle error response message from server
+            setErrorPopUpPanel(true);
+            setError("Rides not availabel");
+        }
     }
 
-    async function createRide(){
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`,{
+    async function createRide() {
+        let rideFare;
+        if (vehicleType == 'car') rideFare = fare.car;
+        else if (vehicleType == 'bike') rideFare = fare.bike;
+        else if (vehicleType == 'auto') rideFare = fare.auto;
+
+        console.log(fare);
+        console.log("Ride Fare - ", rideFare)
+
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
             pickup,
             destination,
-            vehicleType
-        },{
-            headers:{
+            vehicleType,
+            rideFare
+        }, {
+            headers: {
                 Authorization: `Bearer ${localStorage.getItem('userToken')}`
             }
         })
@@ -161,6 +188,15 @@ const Home = () => {
             ease: "power2.out",
         });
     }, [waitingDriverPanel]);
+
+
+    useGSAP(() => {
+        gsap.to(errorPopUpPanelRef.current, {
+            y: errorPopUpPanel ? 0 : "100%",
+            duration: 0.3,
+            ease: "power2.out",
+        });
+    }, [errorPopUpPanel]);
 
     return (
         <div className="h-screen relative overflow-hidden">
@@ -230,10 +266,20 @@ const Home = () => {
 
                 </div>
 
+                {/* Error Panel */}
+                <div
+                    ref={errorPopUpPanelRef}
+                    className="z-20 fixed bottom-0 flex items-center justify-center w-full h-screen translate-y-full"
+                >
+                    <ErrorPopUp setErrorPopUpPanel={setErrorPopUpPanel} error={error} />
+                </div>
+
                 {/* Location Search Panel */}
                 <div ref={panelRef} className="bg-white overflow-y-auto max-h-[70%] rounded-t-2xl">
                     <LocationSearchPanel
                         suggestions={activeField === 'pickup' ? pickupSuggestions : destinationSuggestions}
+                        setPickupCoords={setPickupCoords}
+                        setDestinationCoords={setDestinationCoords}
                         setPanel={setPanel}
                         setVehiclePanel={setVehiclePanel}
                         setPickup={setPickup}
@@ -271,7 +317,7 @@ const Home = () => {
                         setVehiclePanel={setVehiclePanel}
                         setConfirmRidePanel={setConfirmRidePanel}
                         setSearchingDriverPanel={setSearchingDriverPanel}
-                        />
+                    />
                 </div>
 
                 {/* Searching for driver ride panel */}

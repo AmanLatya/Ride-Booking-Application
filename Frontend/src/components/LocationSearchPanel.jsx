@@ -1,17 +1,23 @@
 import React from "react";
 
-const LocationSearchPanel = ({ suggestions, setVehiclePanel, setPanel, setPickup, setDestination, activeField }) => {
+const LocationSearchPanel = ({ suggestions, setDestinationCoords, setPickupCoords, setVehiclePanel, setPanel, setPickup, setDestination, activeField }) => {
 
     // console.log(suggestions)
 
     const handleSuggestionsClick = (suggestion) => {
-        // console.log(suggestion)
+        const { description, coordinates } = suggestion;
+
         if (activeField === 'pickup') {
-            setPickup(suggestion.description)
+            setPickup(description);
+            setPickupCoords(coordinates);
+            // console.log("📍 Pickup Coordinates:", coordinates);
         } else if (activeField === 'destination') {
-            setDestination(suggestion.description)
+            setDestination(description);
+            setDestinationCoords(coordinates);
+            // console.log("📍 Destination Coordinates:", coordinates);
         }
-    }
+    };
+
 
     return (
 
@@ -34,7 +40,6 @@ const LocationSearchPanel = ({ suggestions, setVehiclePanel, setPanel, setPickup
                     ))
                 )
             }
-
 
         </div>
     )

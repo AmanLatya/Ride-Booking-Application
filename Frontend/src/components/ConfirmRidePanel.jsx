@@ -4,8 +4,6 @@ import autoImg from "../assets/Auto.png"
 import bikeImg from "../assets/Bike.webp";
 
 const ConfirmRidePanel = (props) => {
-    console.log(props);
-    console.log("Fare - " , props.fare);
     const vehicle = props.vehicleType;
     let img = carImg; 
     if(vehicle == 'car') img = carImg;
