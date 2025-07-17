@@ -7,12 +7,12 @@ const blackListModel = require("../models/black-list-token");
 module.exports.authUser = async(req,res,next)=>{
     const token = req.cookies?.userToken || req.headers.authorization?.split(" ")[1];
     if(!token){
-        return res.status(401).json({message: "Unauthorized: No token provided"});
+        return res.status(401).json({message: "Unauthorized: Token"});
     }
 
     const isBlackListed = await blackListModel.findOne({ token });
     if(isBlackListed){
-        return res.status(401).json({message: "Unauthorized: Token is blacklisted"});
+        return res.status(401).json({message: "Unauthorized: Token"});
     }   
     
     try{
@@ -34,12 +34,12 @@ module.exports.authUser = async(req,res,next)=>{
 module.exports.captionAuth = async(req,res,next)=>{
     const token = req.cookies?.captionToken || req.headers.authorization?.split(" ")[1];
     if(!token){
-        return res.status(401).json({message: "Unauthorized: No token provided"});
+        return res.status(401).json({message: "Unauthorized: Token"});
     }
 
     const isBlackListed = await blackListModel.findOne({ token });
     if(isBlackListed){
-        return res.status(401).json({message: "Unauthorized: Token is blacklisted"});
+        return res.status(401).json({message: "Unauthorized: Token"});
     }   
     
     try{

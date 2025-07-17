@@ -33,8 +33,6 @@ module.exports.handleCaptionRegister = async (req, res, next) => {
     }
 }
 
-
-
 module.exports.handleCaptionLogin = async (req,res,next) =>{
     const error = validationResult(req);
     if (!error.isEmpty()) {

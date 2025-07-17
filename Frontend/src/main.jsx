@@ -5,15 +5,18 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import UserContext from './context/userContext.jsx'
 import CaptionContext from './context/captionContext.jsx' // ✅ Use default export
+import SocketContext from './context/socketContext.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode>
+  <CaptionContext> {/* ✅ Correct wrapper */}
     <UserContext>
-      <CaptionContext> {/* ✅ Correct wrapper */}
+      <SocketContext>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </CaptionContext>
+      </SocketContext>
     </UserContext>
-  </StrictMode>
+  </CaptionContext>
+  // </StrictMode>
 )

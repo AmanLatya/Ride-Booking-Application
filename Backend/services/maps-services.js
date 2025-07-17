@@ -1,4 +1,6 @@
 const axios = require('axios');
+const CaptionModel = require("../models/caption-model");
+
 
 module.exports.getDistanceTime = async (pickupCoords, destinationCoords) => {
     if (!pickupCoords || !destinationCoords) {
@@ -80,6 +82,7 @@ module.exports.getSuggestions = async (query) => {
     try {
         const response = await axios.get(url);
         if (response.status === 200) {
+            // console.log(response.data);
             return response.data.features.map(feature => {
                 const props = feature.properties;
                 const parts = [
@@ -90,7 +93,6 @@ module.exports.getSuggestions = async (query) => {
                     props.state,
                     props.country
                 ].filter(Boolean); // remove undefined/null
-
                 return {
                     description: parts.join(', '),
                     coordinates: feature.geometry.coordinates // [lng, lat]
@@ -104,3 +106,17 @@ module.exports.getSuggestions = async (query) => {
         throw err;
     }
 };
+
+
+
+module.exports.getCaptionsInRadius = async(ltd,lng,radius)  =>{
+    const captions = await CaptionModel.find({
+        location:{
+            $geoWithin:{
+                $centerSphere : [[lng, ltd], radius/6371]
+            }
+        }
+    })
+
+    return captions;
+}

@@ -72,6 +72,7 @@ const ConfirmRidePanel = (props) => {
                     props.setSearchingDriverPanel(true);
                     props.setConfirmRidePanel(false);
                     props.createRide()
+                    // console.log()
                 }}
                 className="w-full bg-green-500 text-white text-xl font-semibold py-3 rounded-2xl hover:bg-green-600 transition duration-200"
             >

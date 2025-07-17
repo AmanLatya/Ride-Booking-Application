@@ -1,20 +1,34 @@
 import React from "react";
 import carImg from "../assets/car.png";
+import autoImg from "../assets/Auto.png"
+import bikeImg from "../assets/Bike.webp";
 import userImg from "../assets/user.png";
 
 const WaitingDriver = (props) => {
+    if (!props.ride) {
+        return <div>Loading ride details...</div>;
+    }
+
+    let vehicle = props.vehicleType;
+
+    let img = carImg;
+    if (vehicle == 'car') img = carImg;
+    else if (vehicle == 'bike') img = bikeImg;
+    else if (vehicle == 'auto') img = autoImg;
+
     return (
-        <div className="px-5 py-6 flex flex-col gap-5 w-full max-w-2xl mx-auto">
+        <div className="px-5 py-6 flex flex-col gap-5 w-full h-1/2 max-w-2xl mx-auto">
             {/* Pull Handle */}
-            <div
+            {/* <div
                 onClick={() => {
-                    props.setWaitingDriverPanel(false);
-                    props.setConfirmRidePanel(true);
+                    props.setWaitingDriverPanel(true) ? false : true;
+                    // props.setWaitingDriverPanel(WaitingDriver);
+                    // props.setConfirmRidePanel(true);
                 }}
                 className="flex justify-center"
             >
                 <div className="w-14 h-1 bg-gray-300 rounded-full cursor-pointer"></div>
-            </div>
+            </div> */}
 
             {/* Heading */}
             <div className="flex justify-between items-center border-b pb-2">
@@ -26,13 +40,13 @@ const WaitingDriver = (props) => {
             <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                     <img className="h-16 w-16 rounded-full object-cover" src={userImg} alt="Driver" />
-                    <img className="h-16 object-contain" src={carImg} alt="Car" />
+                    <img className="h-16 object-contain" src={img} alt="Car" />
                 </div>
                 <div className="text-right">
-                    <h3 className="text-lg font-medium text-gray-800">SMITH</h3>
-                    <h1 className="text-2xl font-semibold text-black tracking-wide">KS12AK1102</h1>
-                    <p className="text-sm text-gray-600">White Suzuki S-Presso LXI</p>
-                    <p className="text-yellow-600 text-sm"><i className="ri-star-fill"></i> 4.9</p>
+                    <h3 className="text-lg font-medium text-gray-800 capitalize">{props.ride.caption.fullName.firstName}</h3>
+                    <h1 className="text-2xl font-semibold text-black tracking-wide capitalize">{props.ride.caption.vehicle.vehicleNumber}</h1>
+                    <p className="text-sm text-gray-600 capitalize">White Suzuki S-Presso LXI</p>
+                    <p className="text-green-500 text-md font-semibold">OTP - {props.ride.otp}</p>
                 </div>
             </div>
 
@@ -73,8 +87,17 @@ const WaitingDriver = (props) => {
                     <i className="ri-user-location-line"></i>
                 </div>
                 <div>
-                    <h2 className="text-lg font-medium text-gray-800">196 D-S-3</h2>
-                    <p className="text-sm text-gray-600">Vijay Nagar, Near Atal Ground.</p>
+                    <h2 className="text-lg font-medium text-gray-800">Pickup</h2>
+                    <p className="text-sm text-gray-600">{props.ride.pickup}</p>
+                </div>
+            </div>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-lg shadow-md bg-white w-full">
+                <div className="text-xl text-red-600">
+                    <i className="ri-user-location-line"></i>
+                </div>
+                <div>
+                    <h2 className="text-lg font-medium text-gray-800">Destination</h2>
+                    <p className="text-sm text-gray-600">{props.ride.destination}</p>
                 </div>
             </div>
 
@@ -83,6 +106,7 @@ const WaitingDriver = (props) => {
                 onClick={() => {
                     props.setWaitingDriverPanel(false);
                     props.setVehiclePanel(true);
+                    props.cancelRide();
                 }}
                 type="button"
                 className="w-full bg-red-500 hover:bg-red-600 text-white text-lg font-semibold py-3 rounded-lg shadow-md"

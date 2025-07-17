@@ -1,4 +1,4 @@
-import React, { useActionState, useRef, useState } from "react";
+import React, { useActionState, useContext, useEffect, useRef, useState } from "react";
 import uberLogo from "../assets/Uber_black.webp";
 import mapImg from "../assets/map.png";
 import { useGSAP } from "@gsap/react";
@@ -11,6 +11,9 @@ import SearchingForDriver from "../components/SearchingForDriver";
 import WaitingDriver from "../components/WaitingDriver";
 import axios from "axios";
 import ErrorPopUp from "../components/ErrorPopUp";
+import { SocketContext } from "../context/socketContext";
+import { UserDataContext } from "../context/userContext";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
     const [pickup, setPickup] = useState("");
@@ -29,12 +32,9 @@ const Home = () => {
     const [destinationCoords, setDestinationCoords] = useState(null);
     const [errorPopUpPanel, setErrorPopUpPanel] = useState(false);
     const [error, setError] = useState("");
+    const [ride, setRide] = useState(null);
+    const [isRideConfirmed, setIsRideConfirmed] = useState(false)
 
-
-
-
-    const [currPickup, setCurrPickup] = useState("")
-    const [currDestination, setCurrDestination] = useState("")
     const panelRef = useRef(null);
     const panelCloseRef = useRef(null);
     const vehiclePanelRef = useRef(null);
@@ -42,6 +42,42 @@ const Home = () => {
     const searchingDriverPanelRef = useRef(null);
     const waitingDriverRef = useRef(null);
     const errorPopUpPanelRef = useRef(null);
+
+    const { socket } = useContext(SocketContext);
+    const { user } = useContext(UserDataContext);
+
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        // console.log(user)
+        socket.emit("join", { userType: "user", userId: user._id });
+
+        socket.on("ride-accepted", (data) => {
+            alert("Ride Accepted");
+            console.log("Your ride was accepted:", data);
+            setSearchingDriverPanel(false);
+            setWaitingDriverPanel(true);
+            setRide(data);
+            // You can now show toast or redirect user
+        });
+
+        socket.on("ride-started", (data) => {
+            alert("Ride Started")
+            navigate('/user-rideing');
+        })
+    }, [socket]);
+
+    if (isRideConfirmed) {
+        rideConfirmed()
+        setIsRideConfirmed(false)
+    }
+    async function rideConfirmed() {
+        console.log(ride);
+        setRide(ride);
+        setSearchingDriverPanel(false)
+        setWaitingDriverPanel(true);
+    }
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -54,7 +90,7 @@ const Home = () => {
     const handlePickupChange = async (e) => {
         const value = e.target.value;
         setPickup(value);
-        setCurrPickup(value);
+        // setCurrPickup(value);
 
         if (!value.trim()) {
             setPickupSuggestions([]); // clear suggestions
@@ -77,7 +113,7 @@ const Home = () => {
     const handleDestinationChange = async (e) => {
         const value = e.target.value;
         setDestination(value);
-        setCurrDestination(value);
+        // setCurrDestination(value);
 
         if (!value.trim()) {
             setDestinationSuggestions([]); // clear suggestions
@@ -129,12 +165,11 @@ const Home = () => {
         else if (vehicleType == 'bike') rideFare = fare.bike;
         else if (vehicleType == 'auto') rideFare = fare.auto;
 
-        console.log(fare);
-        console.log("Ride Fare - ", rideFare)
-
         const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
             pickup,
+            pickupCoords,
             destination,
+            destinationCoords,
             vehicleType,
             rideFare
         }, {
@@ -144,6 +179,16 @@ const Home = () => {
         })
     }
 
+    async function cancelRide() {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/cancel`, {
+            params: {
+                rideID: ride._id
+            },
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('userToken')}`
+            }
+        })
+    }
     // Panel animations
     useGSAP(() => {
         gsap.to(panelRef.current, {
@@ -334,7 +379,6 @@ const Home = () => {
                         setVehiclePanel={setVehiclePanel}
                         setConfirmRidePanel={setConfirmRidePanel}
                         setSearchingDriverPanel={setSearchingDriverPanel}
-                        setWaitingDriverPanel={setWaitingDriverPanel}
                     />
                 </div>
 
@@ -344,9 +388,13 @@ const Home = () => {
                     className="z-20 fixed bg-white px-6 pb-7 pt-5 translate-y-full w-full bottom-0 rounded-t-2xl shadow-2xl"
                 >
                     <WaitingDriver
+                        waitingDriverPanel={waitingDriverPanel}
                         setWaitingDriverPanel={setWaitingDriverPanel}
                         setConfirmRidePanel={setConfirmRidePanel}
                         setVehiclePanel={setVehiclePanel}
+                        ride={ride}
+                        cancelRide={cancelRide}
+                        vehicleType={vehicleType}
                     />
                 </div>
             </div>

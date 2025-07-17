@@ -16,7 +16,6 @@ async function handleUserRegister(req, res, next) {
     }
 
     try{
-
         const hashedPassword = await userModel.hashPassword(password);
         const user = await userServices.createUser({
             firstName: fullName.firstName,
@@ -53,6 +52,8 @@ async function handleUserLogin(req, res, next) {
     res.cookie('userToken', token)
     res.status(200).json({msg: "Login successful", token, user });
 }
+
+
 
 async function handleGetUserProfile(req, res, next) {
     const user = req.user;
