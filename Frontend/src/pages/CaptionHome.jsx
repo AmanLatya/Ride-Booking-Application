@@ -83,13 +83,8 @@ const CaptionHome = () => {
                     Authorization: `Bearer ${localStorage.getItem('captionToken')}`
                 }
             });
-
-            // console.log("Ride Accepted Response:", response.data);
-            // alert("You accepted this ride")
             setRide(response.data); // Update UI
             setRideAccepted(true);
-            // ✅ No need to call sendMessageToUser
-            // It is now handled on backend
             setAcceptRide(true);
             setRidePopUpPanel(false);
         } catch (err) {
@@ -100,17 +95,21 @@ const CaptionHome = () => {
     if (rideAccepted) {
         sendMessage();
         setRideAccepted(false);
-        // console.log(ride);
     }
 
     async function sendMessage() {
-        await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/send-message`, {
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/send-message`, {
             ride: ride
         }, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('captionToken')}`
             }
         });
+
+        console.log(response.data)
+        if(response.status === 200){
+            setRideStarted(false);
+        }
     }
 
     async function startRide() {
@@ -130,16 +129,14 @@ const CaptionHome = () => {
             console.log(response.data);
             setRide(response.data);
             setRideStarted(true);
-            alert("we are rendering");
             setOtp("");
-            navigate("/caption-rideing");
         }
     }
-
-    if(rideStarted){
+    
+    if (rideStarted) {
+        alert("Ride Started");
         console.log(ride);
         sendMessage();
-        setRideStarted(false);
     }
     // Animate CaptionDetails Panel
     useGSAP(() => {
