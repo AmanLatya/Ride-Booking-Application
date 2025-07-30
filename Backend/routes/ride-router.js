@@ -26,13 +26,13 @@ router.post("/accept",
 );
 
 router.post("/send-message",
-    authMiddleware.captionAuth,
+    // authMiddleware.captionAuth,
     body('ride').isObject().withMessage("Invalid Ride"),
     rideController.sendMessage
 )
 
 router.get("/cancel",
-    authMiddleware.authUser,
+    // authMiddleware.authUser,
     query('rideID').isMongoId().withMessage("Invalid Ride ID"),
     rideController.cancleRide
 )

@@ -23,7 +23,7 @@ const RideInvitation = (props) => {
                 </div>
                 <div className="text-right">
                     <h3 className="text-lg font-semibold text-violet-600">{props.ride?.fare}</h3>
-                    <p className="text-sm text-gray-600">2.25 km</p>
+                    <p className="text-sm text-gray-600">{props.ride?.distance} Km</p>
                 </div>
             </div>
 
@@ -71,8 +71,7 @@ const RideInvitation = (props) => {
                     <div className="flex justify-end gap-3 pt-2">
                         <div
                             onClick={() => {
-                                props.setAcceptRide(false)
-                                props.setRidePopUpPanel(false)
+                                props.cancelRide()
                             }}
                             className="px-5 py-2 font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
                         >

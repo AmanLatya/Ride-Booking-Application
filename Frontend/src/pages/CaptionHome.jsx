@@ -10,9 +10,7 @@ import AcceptRide from "../components/AcceptRide";
 import { SocketContext } from "../context/socketContext";
 import { CaptionDataContext } from "../context/captionContext";
 import axios from "axios";
-// import { sendMessageToSockedId } from "../../../Backend/socket";
-
-
+import { toast } from "react-toastify";
 
 const CaptionHome = () => {
     const [captionDetailsPanel, setCaptionDetailsPanel] = useState(true);
@@ -22,6 +20,7 @@ const CaptionHome = () => {
     const [rideAccepted, setRideAccepted] = useState(false);
     const [otp, setOtp] = useState("");
     const [rideStarted, setRideStarted] = useState(false);
+    const [rideCancelled, setRideCancelled] = useState(false);
 
     const captionDetailsPanelRef = useRef(null);
     const ridePopUpPanelRef = useRef(null);
@@ -40,38 +39,60 @@ const CaptionHome = () => {
 
         const updateLocation = () => {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(postion => {
+                navigator.geolocation.getCurrentPosition(position => {
                     socket.emit('update-loction-caption', {
                         userId: caption._id,
                         location: {
-                            ltd: postion.coords.latitude,
-                            lng: postion.coords.longitude
+                            ltd: position.coords.latitude,
+                            lng: position.coords.longitude
                         }
-                    })
-                })
+                    });
+                });
             }
-        }
+        };
         const locationInterval = setInterval(updateLocation, 10000);
         updateLocation();
 
         socket.on('new-ride', (data) => {
-            // console.log(data);
             setRide(data);
             setRidePopUpPanel(true);
-        })
+        });
 
-        socket.on('ride-cancelled', data => {
-            // alert(data);
-            setRide(null);
+        socket.on("ride-cancelled", (data) => {
+            // alert("Ride Cancelled");
+            toast.info("Ride Cancel")
             setAcceptRide(false);
-            setRideAccepted(false);
+            setRide(null);
         })
         socket.on('ride-started', (ride) => {
-            // alert("Navigating... Message Recived");
-            // console.log(ride);
-            navigate("/caption-rideing")
-        })
-    }, [])
+            // alert("Ride Started");
+            toast.info("Ride Start")
+            navigate("/caption-rideing", { state: { ride } });
+        });
+
+        return () => clearInterval(locationInterval);
+    }, [socket]);
+
+    useEffect(() => {
+        if (rideAccepted) {
+            sendMessage();
+            setRideAccepted(false);
+        }
+    }, [rideAccepted]);
+
+    useEffect(() => {
+        if (rideStarted) {
+            sendMessage();
+            setRideStarted(false);
+        }
+    }, [rideStarted]);
+
+    useEffect(() => {
+        if (rideCancelled) {
+            sendMessage();
+            setRideCancelled(false);
+        }
+    }, [rideCancelled]);
 
     async function rideAccept() {
         try {
@@ -83,7 +104,7 @@ const CaptionHome = () => {
                     Authorization: `Bearer ${localStorage.getItem('captionToken')}`
                 }
             });
-            setRide(response.data); // Update UI
+            setRide(response.data);
             setRideAccepted(true);
             setAcceptRide(true);
             setRidePopUpPanel(false);
@@ -92,53 +113,75 @@ const CaptionHome = () => {
         }
     }
 
-    if (rideAccepted) {
-        sendMessage();
-        setRideAccepted(false);
-    }
-
     async function sendMessage() {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/send-message`, {
-            ride: ride
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('captionToken')}`
-            }
-        });
+        if (!ride) return;
 
-        console.log(response.data)
-        if(response.status === 200){
-            setRideStarted(false);
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/send-message`, {
+                ride: ride
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('captionToken')}`
+                }
+            });
+            //console(response.data);
+            if (response.status === 200) {
+                //console(ride);
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
         }
     }
 
     async function startRide() {
-        console.log(`Ride ID ${ride._id}`);
-        console.log(`OTP ${otp}`);
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/start`, {
-            params: {
-                rideID: ride._id,
-                otp: otp
-            },
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('captionToken')}`
-            }
-        })
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/start`, {
+                params: {
+                    rideID: ride._id,
+                    otp: otp
+                },
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('captionToken')}`
+                }
+            });
 
-        if (response.status === 200) {
-            console.log(response.data);
-            setRide(response.data);
-            setRideStarted(true);
-            setOtp("");
+            if (response.status === 200) {
+                setRide(response.data);
+                setRideStarted(true);
+                setOtp("");
+            }
+        } catch (err) {
+            console.error("Start ride failed:", err);
+            alert("Invalid OTP or ride not found");
         }
     }
-    
-    if (rideStarted) {
-        alert("Ride Started");
-        console.log(ride);
-        sendMessage();
+
+    async function cancelRide() {
+        if (!ride) {
+            alert("No active ride to cancel.");
+            return;
+        }
+
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/cancel`, {
+                params: {
+                    rideID: ride._id
+                },
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('captionToken')}`
+                }
+            });
+
+            if (response.status === 200) {
+                setRide(response.data);
+                setRideCancelled(true);
+            }
+        } catch (err) {
+            console.error("Ride cancellation failed:", err);
+            alert("Failed to cancel ride");
+        }
     }
-    // Animate CaptionDetails Panel
+
     useGSAP(() => {
         gsap.to(captionDetailsPanelRef.current, {
             y: captionDetailsPanel ? 0 : "100%",
@@ -155,7 +198,6 @@ const CaptionHome = () => {
         });
     }, [ridePopUpPanel]);
 
-    // Animate RideInvitation Panel
     useGSAP(() => {
         gsap.to(acceptRideRef.current, {
             y: acceptRide ? 0 : "100%",
@@ -166,10 +208,8 @@ const CaptionHome = () => {
 
     return (
         <div className="relative h-screen w-full overflow-hidden">
-            {/* Background Map */}
             <img src={mapImg} className="absolute top-0 left-0 h-full w-full object-cover" alt="Map" />
 
-            {/* Top Nav */}
             <div className="z-10 fixed top-5 left-0 right-0 flex justify-between items-center px-6">
                 <img src={uberLogo} className="h-9" alt="Uber Logo" />
                 <Link
@@ -180,7 +220,6 @@ const CaptionHome = () => {
                 </Link>
             </div>
 
-            {/* Caption Details Panel */}
             <div
                 ref={captionDetailsPanelRef}
                 className="z-10 fixed bottom-0 left-0 right-0 translate-y-full bg-white rounded-t-3xl shadow-2xl px-5 pt-4 pb-7"
@@ -188,8 +227,6 @@ const CaptionHome = () => {
                 <CaptionDetails setCaptionDetailsPanel={setCaptionDetailsPanel} />
             </div>
 
-
-            {/* Ride POPUP */}
             <div
                 ref={ridePopUpPanelRef}
                 className="z-20 fixed bottom-0 left-0 right-0 px-5 translate-y-full"
@@ -200,17 +237,16 @@ const CaptionHome = () => {
                     setAcceptRide={setAcceptRide}
                     rideAccept={rideAccept}
                     setRideAccepted={setRideAccepted}
-                // test={test}
                 />
             </div>
 
-            {/* Accept Ride POPUP */}
             <div
                 ref={acceptRideRef}
                 className="z-20 fixed bottom-0 left-0 right-0 px-5 bg-white translate-y-full"
             >
                 <AcceptRide
                     ride={ride}
+                    cancelRide={cancelRide}
                     setAcceptRide={setAcceptRide}
                     setRidePopUpPanel={setRidePopUpPanel}
                     startRide={startRide}

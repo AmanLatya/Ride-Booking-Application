@@ -15,6 +15,34 @@ const rideSchema = new mongoose.Schema({
         required: true,
         minlength: [3, 'Pickup location must be at least 3 characters']
     },
+    pickupCoords: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true,
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
+    destinationCoords: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true,
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
+    distance:{
+        type: [Number],
+        required: true
+    },
     destination: {
         type: String,
         required: true,
@@ -30,13 +58,13 @@ const rideSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    otp:{
+    otp: {
         type: String,
         required: true,
         select: false
     },
     status: {
-        type:String,
+        type: String,
         enum: ['pending', 'accepted', 'ongoing', 'completed', 'cancelled'],
         default: 'pending'
     },

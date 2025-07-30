@@ -5,6 +5,7 @@ const LocationSearchPanel = ({ suggestions, setDestinationCoords, setPickupCoord
     // console.log(suggestions)
 
     const handleSuggestionsClick = (suggestion) => {
+        console.log(suggestion)
         const { description, coordinates } = suggestion;
 
         if (activeField === 'pickup') {

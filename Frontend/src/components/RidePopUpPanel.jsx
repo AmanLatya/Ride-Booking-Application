@@ -15,8 +15,8 @@ const RidePopUpPanel = (props) => {
                     </div>
                 </div>
                 <div className="text-right">
-                    <h3 className="text-lg font-semibold text-violet-600">{props.ride?.fare}</h3>
-                    <p className="text-sm text-gray-600">2.25 km</p>
+                    <h3 className="text-lg font-semibold text-violet-600">{props.ride?.fare} Rs</h3>
+                    <p className="text-sm text-gray-600">{props.ride?.distance} Km</p>
                 </div>
             </div>
 

@@ -1,15 +1,19 @@
 import React, { useRef, useState } from "react";
 import uberLogo from "../assets/Uber_black.webp";
 import mapImg from "../assets/map.png";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import RideDetail from "../components/RideDetail"
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 
-const CaptionRideing = () => {
+const CaptionRideing = (props) => {
     const [rideDetailPanel, setRideDetailPanel] = useState(false);
     const rideDetailPanelRef = useRef(null);
+    const location = useLocation();
+    const rideData = location.state?.ride;
+    console.log(location);
+    console.log(rideData);
 
     useGSAP(function(){
         if(rideDetailPanel){
@@ -46,7 +50,7 @@ const CaptionRideing = () => {
                 className="z-10 fixed bottom-0 left-0 right-0 bg-yellow-300 rounded-t-xl shadow-2xl px-5 "
             >
                 <div className="flex justify-around items-center w-full py-5">
-                    <h1 className="text-xl font-semibold">4 KM Away</h1>
+                    <h1 className="text-xl font-semibold">{rideData.distance} KM Away</h1>
                     <button
                         className="px-5 py-2 font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition"
                     >
@@ -60,7 +64,10 @@ const CaptionRideing = () => {
                 ref={rideDetailPanelRef}
                 className="z-20 fixed bottom-0 left-0 right-0 px-5 bg-white translate-y-full"
             >
-                <RideDetail setRideDetailPanel={setRideDetailPanel} />
+                <RideDetail 
+                    setRideDetailPanel={setRideDetailPanel}
+                    rideData={rideData}
+                />
             </div>
         </div>
     );

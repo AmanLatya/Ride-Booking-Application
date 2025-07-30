@@ -52,23 +52,38 @@ module.exports.getFare = getFare;
 
 
 module.exports.createRideService = async ({
-    user, pickup, destination, vehicleType, rideFare
+    user, pickup, destination, vehicleType, rideFare, pickupCoords, destinationCoords
 }) => {
-
-    if (!user || !pickup || !destination || !vehicleType || !rideFare) {
+    console.log("Service : 57 ", user, pickup, destination, vehicleType, rideFare, pickupCoords, destinationCoords)
+    if (!user || !pickup || !destination || !vehicleType || !rideFare || !pickupCoords || !destinationCoords) {
         throw new Error('All Fields required');
     }
 
+    const dx = destinationCoords[0] - pickupCoords[0];
+    const dy = destinationCoords[1] - pickupCoords[1];
+
+    const distance = Math.ceil(Math.sqrt(dx ** 2 + dy ** 2) * 100);
+    console.log("66 - ",distance);
     // const fare = await getFare(pickup, destination);
-    const ride = rideModel.create({
+    const ride = await rideModel.create({
         user,
         pickup,
+        pickupCoords: {
+            type: "Point",
+            coordinates: pickupCoords
+        },
         destination,
+        destinationCoords: {
+            type: "Point",
+            coordinates: destinationCoords
+        },
+        distance,
         vehicleType,
         otp: await generateOTP(6),
         fare: rideFare
+    });
+    console.log("Service 73 - ", ride);
 
-    })
     return ride;
 }
 
@@ -105,22 +120,22 @@ module.exports.rideAcceptService = async ({ rideId, caption }) => {
     return ride;
 }
 
-module.exports.cancleRideService = async({rideID}) =>{
-    if(!rideID){
+module.exports.cancleRideService = async ({ rideID }) => {
+    if (!rideID) {
         throw new Error("Ride ID not Found");
     }
 
     await rideModel.findByIdAndUpdate({
         _id: rideID
-    },{
+    }, {
         status: "cancelled"
     });
 
     const ride = await rideModel.findOne({
         _id: rideID
-    }).populate("caption");
+    }).populate("caption").populate("user");
 
-    if(!ride) throw new Error("Ride Not Found");
+    if (!ride) throw new Error("Ride Not Found");
 
     return ride;
 }
@@ -155,6 +170,6 @@ module.exports.startRide = async ({ rideID, otp }) => {
     const updatedRide = await rideModel.findOne({
         _id: rideID
     }).populate("user").populate("caption");
-    
+
     return updatedRide;
 }

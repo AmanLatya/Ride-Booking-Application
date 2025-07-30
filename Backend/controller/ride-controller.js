@@ -11,16 +11,12 @@ module.exports.createRide = async (req, res, next) => {
     }
 
     const { pickup, destination, vehicleType, rideFare, pickupCoords, destinationCoords } = req.body;
+    console.log("Controller - 14 ", req.body);
     try {
-        const ride = await rideServices.createRideService({ user: req.user._id, pickup, destination, vehicleType, rideFare });
-        // console.log("Ride Created - ", ride)
-        // console.log(ride);
+        const ride = await rideServices.createRideService({ user: req.user._id, pickup, destination, vehicleType, rideFare, pickupCoords, destinationCoords });
+        console.log("Controller - 17 ", ride);
         res.status(201).json(ride);
-        // console.log(pickupCoords);
-        // console.log(`1. ${pickupCoords[0]}, 2. ${pickupCoords[1]}`);
         const CaptionsInRadius = await mapServices.getCaptionsInRadius(pickupCoords[0], pickupCoords[1], 1);
-
-        // console.log(CaptionsInRadius);
         ride.otp = "";
 
         const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate('user');
@@ -77,21 +73,33 @@ module.exports.rideAccept = async (req, res, next) => {
 
 module.exports.sendMessage = async (req, res, next) => {
     const { ride } = req.body;
-    console.log(`Ride - : ${ride}`)
-    console.log(`Ride Status- : ${ride.status}`)
+    console.log(`Ride Status- 76: ${ride.status}`)
     try {
-        if(ride.status === "accepted"){
+        if (ride.status === "accepted") {
             sendMessageToSocketId(ride.user.socketID, {
                 event: "ride-accepted",
                 data: ride
             })
-        }
-        if(ride.status === "ongoing"){
+            return res.status(200).json({message : "Ride Accepted"});
+        } else if (ride.status === "ongoing") {
             sendMessageToSocketId(ride.user.socketID, {
                 event: "ride-started",
                 data: ride
             })
+            return res.status(200).json({message : "Ride Started"});
+        } else if (ride.status === "cancelled") {
+            sendMessageToSocketId(ride.user.socketID, {
+                event: 'ride-cancelled',
+                data: ride
+            })
+            sendMessageToSocketId(ride.caption.socketID, {
+                event: 'ride-cancelled',
+                data: ride
+            })
+            return res.status(200).json({message : "Ride Cancelled"});
         }
+        return res.status(400).json({message : "Invalid event"});
+        
     } catch (err) {
         consol.log(err);
         return res.status(500).json({ message: err });
@@ -108,12 +116,8 @@ module.exports.cancleRide = async (req, res, next) => {
 
     try {
         const ride = await rideServices.cancleRideService({ rideID });
-        console.log("controller - 106 : ", ride)
-        sendMessageToSocketId(ride.caption.socketID, {
-            event: 'ride-cancelled',
-            data: 'Ride Cancelled'
-        })
-        return res.status(200).json({ message: "Ride Canclled" });
+        console.log("Cont - 119 ", ride.status);
+        return res.status(200).json(ride);
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: err });
@@ -130,7 +134,7 @@ module.exports.startRide = async (req, res, next) => {
 
     try {
         const ride = await rideServices.startRide({ rideID, otp });
-        console.log("Cont 128 : ",ride);
+        console.log("Cont 128 : ", ride);
         sendMessageToSocketId(ride.caption.socketID, {
             event: 'ride-started',
             data: ride

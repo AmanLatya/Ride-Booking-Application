@@ -1,15 +1,28 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import mapImg from "../assets/map.png";
 import carImg from "../assets/car.png";
 import userImg from "../assets/user.png";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { SocketContext } from "../context/socketContext";
 
-const Rideing = () => {
+const Rideing = (props) => {
     const [paymentPanel, setPaymentPanel] = useState(true);
     const paymentPanelRef = useRef(null);
     const paymentClosePanelRef = useRef(null);
+    const location = useLocation();
+    const rideData = location.state?.data; 
+    console.log(rideData);
+
+    const { socket } = useContext(SocketContext);
+    useEffect(() => {
+        socket.on("ride-started", (data) => {
+            console.log(data);
+            // alert("Ride Started");
+            // navigate('/user-rideing');
+        })
+    }, [socket])
 
     useGSAP(() => {
         if (paymentPanel) {
@@ -65,8 +78,8 @@ const Rideing = () => {
                         <img className="h-20 w-20 rounded-full object-cover" src={userImg} alt="Driver" />
                     </div>
                     <div className="w-2/3 text-right">
-                        <h3 className="text-lg font-medium text-gray-800">SMITH</h3>
-                        <h1 className="text-xl font-bold text-black">KS12AK1102</h1>
+                        <h3 className="text-lg font-medium text-gray-800">{rideData.caption.fullName.firstName}</h3>
+                        <h1 className="text-xl font-bold text-black">{rideData.caption.vehicle.vehicleNumber}</h1>
                         <p className="text-sm text-gray-500">White Suzuki S-Presso LXI</p>
                     </div>
                 </div>
@@ -76,15 +89,15 @@ const Rideing = () => {
                     <div className="flex items-center gap-4 bg-gray-100 p-3 rounded-lg shadow-sm">
                         <i className="ri-map-pin-2-fill text-xl text-violet-500"></i>
                         <div>
-                            <h2 className="text-lg font-semibold">SGSITS</h2>
-                            <p className="text-sm text-gray-600">Near Railway Station</p>
+                            <h2 className="text-lg font-semibold">{rideData.pickup}</h2>
+                            <p className="text-sm text-gray-600">{rideData.destination}</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4 bg-gray-100 p-3 rounded-lg shadow-sm">
                         <i className="ri-wallet-fill text-xl text-green-500"></i>
                         <div>
-                            <h2 className="text-lg font-semibold">₹195.56</h2>
+                            <h2 className="text-lg font-semibold">{rideData.fare} Rs</h2>
                             <p className="text-sm text-gray-600">Payment Method: Cash</p>
                         </div>
                     </div>

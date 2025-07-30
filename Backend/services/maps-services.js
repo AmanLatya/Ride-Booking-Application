@@ -10,31 +10,6 @@ module.exports.getDistanceTime = async (pickupCoords, destinationCoords) => {
     const apiKey = process.env.ORS_API_KEY;
 
     try {
-        // console.log("🔍 Starting geocoding for pickup:", pickup);
-        // const pickupRes = await axios.get(`https://api.openrouteservice.org/geocode/search`, {
-        //     params: {
-        //         api_key: apiKey,
-        //         text: pickup
-        //     }
-        // });
-        // console.log("📦 Pickup geocode response:", JSON.stringify(pickupRes.data, null, 2));
-
-        // console.log("🔍 Starting geocoding for destination:", destination);
-        // const destinationRes = await axios.get(`https://api.openrouteservice.org/geocode/search`, {
-        //     params: {
-        //         api_key: apiKey,
-        //         text: destination
-        //     }
-        // });
-        // console.log("📦 Destination geocode response:", JSON.stringify(destinationRes.data, null, 2));
-
-        // const pickupCoords = pickupRes.data.features[0].geometry.coordinates;
-        // const destinationCoords = destinationRes.data.features[0].geometry.coordinates;
-
-        // console.log("📍 Coordinates:");
-        // console.log("Pickup Coordinates:", pickupCoords);
-        // console.log("Destination Coordinates:", destinationCoords);
-
         // Requesting directions from ORS
         console.log("🧭 Fetching directions from ORS...");
         const directionsRes = await axios.post(
@@ -57,7 +32,7 @@ module.exports.getDistanceTime = async (pickupCoords, destinationCoords) => {
         const durationInMin = Math.ceil(data.duration / 60);
 
         const result = {
-            distance: `${distanceInKm.toFixed(2)} km`,
+            distance: `${distanceInKm.toFixed(1)} km`,
             distanceInKm,
             duration: `${durationInMin} min`,
             durationInMin

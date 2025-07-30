@@ -13,6 +13,8 @@ import CaptionProtectedWrapper from "./pages/CaptionProtectedWrapper";
 import CaptionLogout from "./pages/CaptionLogout";
 import Rideing from "./pages/Rideing";
 import CaptionRideing from "./pages/CaptionRideing";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // Importing the necessary components for routing;
 
 
@@ -20,6 +22,10 @@ import CaptionRideing from "./pages/CaptionRideing";
 const App = () => {
   return (
     <div>
+
+      {/* your routes/components */}
+      <ToastContainer position="top-center" autoClose={2000} />
+      
       <Routes>
         <Route path="/" element={<Start />} />
         <Route path="/user-signup" element={<UserSignUp />} />
@@ -47,19 +53,19 @@ const App = () => {
           <CaptionProtectedWrapper>
             <CaptionHome />
           </CaptionProtectedWrapper>
-          } />
+        } />
 
-          <Route path='/caption-logout' element={
-            <CaptionProtectedWrapper>
-              <CaptionLogout />
-            </CaptionProtectedWrapper>
-          } />
+        <Route path='/caption-logout' element={
+          <CaptionProtectedWrapper>
+            <CaptionLogout />
+          </CaptionProtectedWrapper>
+        } />
 
-          <Route path='/caption-rideing' element={
-            <CaptionProtectedWrapper>
-              <CaptionRideing />
-            </CaptionProtectedWrapper>
-          } />
+        <Route path='/caption-rideing' element={
+          <CaptionProtectedWrapper>
+            <CaptionRideing />
+          </CaptionProtectedWrapper>
+        } />
 
 
 

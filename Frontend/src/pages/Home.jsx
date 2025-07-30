@@ -14,6 +14,7 @@ import ErrorPopUp from "../components/ErrorPopUp";
 import { SocketContext } from "../context/socketContext";
 import { UserDataContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Home = () => {
     const [pickup, setPickup] = useState("");
@@ -34,6 +35,8 @@ const Home = () => {
     const [error, setError] = useState("");
     const [ride, setRide] = useState(null);
     const [isRideConfirmed, setIsRideConfirmed] = useState(false)
+    const [rideCancelled, setRideCancelled] = useState(false);
+
 
     const panelRef = useRef(null);
     const panelCloseRef = useRef(null);
@@ -50,12 +53,13 @@ const Home = () => {
 
 
     useEffect(() => {
-        // console.log(user)
+        // //console(user)
         socket.emit("join", { userType: "user", userId: user._id });
 
         socket.on("ride-accepted", (data) => {
-            alert("Ride Accepted");
-            console.log("Your ride was accepted:", data);
+            // alert("Ride Accepted");
+            toast.info("Ride Accecpt");
+            //console("Your ride was accepted:", data);
             setSearchingDriverPanel(false);
             setWaitingDriverPanel(true);
             setRide(data);
@@ -63,17 +67,32 @@ const Home = () => {
         });
 
         socket.on("ride-started", (data) => {
-            alert("Ride Started")
-            navigate('/user-rideing');
+            // alert("Ride Started");
+            toast.info("Ride Start");
+            navigate('/user-rideing', { state: { data } });
+        })
+
+        socket.on("ride-cancelled", (data) => {
+            // alert("Ride Cancelled");
+            toast.info("Ride Cancel")
+            setWaitingDriverPanel(false);
         })
     }, [socket]);
+
+
+    useEffect(() => {
+        if (rideCancelled) {
+            sendMessage();
+            setRideCancelled(false);
+        }
+    }, [rideCancelled]);
 
     if (isRideConfirmed) {
         rideConfirmed()
         setIsRideConfirmed(false)
     }
     async function rideConfirmed() {
-        console.log(ride);
+        //console(ride);
         setRide(ride);
         setSearchingDriverPanel(false)
         setWaitingDriverPanel(true);
@@ -134,7 +153,7 @@ const Home = () => {
     }
 
     const handleSetFare = async () => {
-        console.log(pickupCoords, " - ", destinationCoords);
+        //console(pickupCoords, " - ", destinationCoords);
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
@@ -179,6 +198,26 @@ const Home = () => {
         })
     }
 
+    async function sendMessage() {
+        if (!ride) return;
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/send-message`, {
+                ride: ride
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('userToken')}`
+                }
+            });
+            //console(response.data);
+            if (response.status === 200) {
+                //console(ride);
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    }
+
     async function cancelRide() {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/cancel`, {
             params: {
@@ -188,6 +227,10 @@ const Home = () => {
                 Authorization: `Bearer ${localStorage.getItem('userToken')}`
             }
         })
+        if (response.status === 200) {
+            setRide(response.data);
+            setRideCancelled(true);
+        }
     }
     // Panel animations
     useGSAP(() => {
@@ -246,7 +289,7 @@ const Home = () => {
     return (
         <div className="h-screen relative overflow-hidden">
             {/* Map Background */}
-            <img src={mapImg} className="h-screen w-screen object-cover absolute" alt="Map" />
+            <img src={mapImg} className="h-screen w-full object-cover absolute" alt="Map" />
 
             {/* Uber Logo */}
             <img src={uberLogo} className="absolute w-24 top-5 left-5" alt="Uber Logo" />

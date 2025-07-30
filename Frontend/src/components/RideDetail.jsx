@@ -17,13 +17,13 @@ const RideDetail = (props) => {
                 <div className="flex items-center gap-4">
                     <img className="h-14 w-14 object-cover rounded-full border border-white shadow-sm" src={userImg} alt="User" />
                     <div>
-                        <h2 className="font-semibold text-gray-800 text-lg">Bethny Page</h2>
-                        <span className="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-medium">10% Discount</span>
+                        <h2 className="font-semibold text-gray-800 text-lg capitalize">{props.rideData?.user.fullName.firstName}</h2>
+                        {/* <span className="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-medium">10% Discount</span> */}
                     </div>
                 </div>
                 <div className="text-right">
-                    <h3 className="text-lg font-semibold text-violet-600">$25.00</h3>
-                    <p className="text-sm text-gray-600">2.25 km</p>
+                    <h3 className="text-lg font-semibold text-violet-600">{props.rideData?.fare}</h3>
+                    <p className="text-sm text-gray-600">{props.rideData?.distance} km</p>
                 </div>
             </div>
 
@@ -34,7 +34,7 @@ const RideDetail = (props) => {
                     <i className="ri-user-location-line text-xl text-blue-500 mt-1"></i>
                     <div>
                         <p className="text-xs text-gray-500 font-medium">PICKUP</p>
-                        <p className="text-base font-semibold text-gray-800">Vijay Nagar, Near Atal Ground</p>
+                        <p className="text-base font-semibold text-gray-800">{props.rideData?.pickup}</p>
                     </div>
                 </div>
 
@@ -43,7 +43,7 @@ const RideDetail = (props) => {
                     <i className="ri-map-pin-2-fill text-xl text-red-500 mt-1"></i>
                     <div>
                         <p className="text-xs text-gray-500 font-medium">DROP OFF</p>
-                        <p className="text-base font-semibold text-gray-800">Railway Station</p>
+                        <p className="text-base font-semibold text-gray-800">{props.rideData?.destination}</p>
                     </div>
                 </div>
             </div>
