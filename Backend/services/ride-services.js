@@ -173,3 +173,36 @@ module.exports.startRide = async ({ rideID, otp }) => {
 
     return updatedRide;
 }
+
+
+module.exports.endRideService = async ({rideID, caption}) =>{
+    if(!rideID || !caption){
+        throw new error("All fields required");
+    }
+
+    const ride = await rideModel.findOne({
+        _id : rideID,
+        caption: caption._id
+    })
+
+    if(!ride){
+        throw new error("Ride Not Found");
+    }
+
+    // if(ride.status != "ongoing" && ride.distance != 0){
+    if(ride.status != "ongoing"){
+        throw new error("Ride is Not Ongoing");
+    }
+
+    await rideModel.findByIdAndUpdate({
+        _id : rideID
+    },{
+        status : "completed"
+    })
+
+    const updatedRide = await rideModel.findOne({
+        _id : rideID
+    }).populate("user").populate("caption");
+
+    return updatedRide;
+}

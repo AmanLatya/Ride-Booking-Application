@@ -58,7 +58,7 @@ const Home = () => {
 
         socket.on("ride-accepted", (data) => {
             // alert("Ride Accepted");
-            toast.info("Ride Accecpt");
+            toast.success("Ride Accecpt");
             //console("Your ride was accepted:", data);
             setSearchingDriverPanel(false);
             setWaitingDriverPanel(true);
@@ -68,13 +68,13 @@ const Home = () => {
 
         socket.on("ride-started", (data) => {
             // alert("Ride Started");
-            toast.info("Ride Start");
+            toast.success("Ride Start");
             navigate('/user-rideing', { state: { data } });
         })
 
         socket.on("ride-cancelled", (data) => {
             // alert("Ride Cancelled");
-            toast.info("Ride Cancel")
+            toast.success("Ride Cancel")
             setWaitingDriverPanel(false);
         })
     }, [socket]);

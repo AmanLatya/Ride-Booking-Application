@@ -1,8 +1,56 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import userImg from "../assets/user.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const RideDetail = (props) => {
+    const [ride, setRide] = useState(null);
+    const [rideEnd, setRideEnd] = useState(false);
+    const navigate = useNavigate();
+    useEffect(() => {
+        if (rideEnd) {
+            sendMessage();
+            setRideEnd(false);
+        }
+    }, [rideEnd])
+
+    async function sendMessage() {
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/send-message`, {
+                ride: ride
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('captionToken')}`
+                }
+            });
+            if (response.status === 200) {
+                console.log(response.data);
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    }
+    async function endRide() {
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/endRide`, {
+                rideID: props.rideData._id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("captionToken")}`
+                }
+            })
+
+            if (response.status === 200) {
+                console.log(response.data);
+                setRideEnd(true);
+                setRide(response.data);
+                navigate('/caption-home');
+            }
+        } catch (err) {
+            console.error("Error sending message ", err)
+        }
+    }
+
     return (
         <div className="bg-white p-5 space-y-4 w-full max-w-md mx-auto ">
             <div
@@ -22,7 +70,7 @@ const RideDetail = (props) => {
                     </div>
                 </div>
                 <div className="text-right">
-                    <h3 className="text-lg font-semibold text-violet-600">{props.rideData?.fare}</h3>
+                    <h3 className="text-lg font-semibold text-violet-600">{props.rideData?.fare} Rs</h3>
                     <p className="text-sm text-gray-600">{props.rideData?.distance} km</p>
                 </div>
             </div>
@@ -50,15 +98,12 @@ const RideDetail = (props) => {
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-2">
-                <Link
-                to='/caption-home'
-                    onClick={() => {
-
-                    }} // Replace with your logic
+                <button
+                    onClick={endRide} // Replace with your logic
                     className="px-5 py-2 font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition"
                 >
                     Finish
-                </Link>
+                </button>
             </div>
         </div>
     )

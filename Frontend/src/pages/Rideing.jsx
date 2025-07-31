@@ -4,23 +4,28 @@ import carImg from "../assets/car.png";
 import userImg from "../assets/user.png";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SocketContext } from "../context/socketContext";
+import { toast } from "react-toastify";
 
 const Rideing = (props) => {
     const [paymentPanel, setPaymentPanel] = useState(true);
     const paymentPanelRef = useRef(null);
     const paymentClosePanelRef = useRef(null);
     const location = useLocation();
-    const rideData = location.state?.data; 
-    console.log(rideData);
+    const rideData = location.state?.data;
+
+    const navigate = useNavigate();
 
     const { socket } = useContext(SocketContext);
     useEffect(() => {
         socket.on("ride-started", (data) => {
-            console.log(data);
-            // alert("Ride Started");
-            // navigate('/user-rideing');
+            toast.success("Ride Start")
+        })
+        socket.on("ride-ended", (data) => {
+            // alert("Ride End")
+            toast.success("Ride End")
+            navigate("/home");
         })
     }, [socket])
 

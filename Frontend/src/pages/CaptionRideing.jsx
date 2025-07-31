@@ -1,31 +1,39 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import uberLogo from "../assets/Uber_black.webp";
 import mapImg from "../assets/map.png";
 import { Link, useLocation } from "react-router-dom";
 import RideDetail from "../components/RideDetail"
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { toast } from "react-toastify";
+import { SocketContext } from "../context/socketContext";
 
 
 const CaptionRideing = (props) => {
+    
     const [rideDetailPanel, setRideDetailPanel] = useState(false);
     const rideDetailPanelRef = useRef(null);
     const location = useLocation();
     const rideData = location.state?.ride;
-    console.log(location);
-    console.log(rideData);
 
-    useGSAP(function(){
-        if(rideDetailPanel){
-            gsap.to(rideDetailPanelRef.current,{
+    const {socket} = useContext(SocketContext);
+    useEffect(() => {
+        socket.on("ride-ended", (data) => {
+            toast.success("Ride End")
+        })
+    }, [socket])
+
+    useGSAP(function () {
+        if (rideDetailPanel) {
+            gsap.to(rideDetailPanelRef.current, {
                 transform: "translateY(0)"
             })
-        }else{
-            gsap.to(rideDetailPanelRef.current,{
+        } else {
+            gsap.to(rideDetailPanelRef.current, {
                 transform: "translateY(100%)"
             })
         }
-    },[rideDetailPanel])
+    }, [rideDetailPanel])
     return (
         <div className="relative h-screen w-full overflow-hidden">
             {/* Background Map */}
@@ -44,7 +52,7 @@ const CaptionRideing = (props) => {
 
             {/* Caption Details Panel */}
             <div
-                onClick={() =>{
+                onClick={() => {
                     setRideDetailPanel(true)
                 }}
                 className="z-10 fixed bottom-0 left-0 right-0 bg-yellow-300 rounded-t-xl shadow-2xl px-5 "
@@ -64,7 +72,7 @@ const CaptionRideing = (props) => {
                 ref={rideDetailPanelRef}
                 className="z-20 fixed bottom-0 left-0 right-0 px-5 bg-white translate-y-full"
             >
-                <RideDetail 
+                <RideDetail
                     setRideDetailPanel={setRideDetailPanel}
                     rideData={rideData}
                 />

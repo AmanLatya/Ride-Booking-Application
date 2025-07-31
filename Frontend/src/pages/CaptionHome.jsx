@@ -60,13 +60,13 @@ const CaptionHome = () => {
 
         socket.on("ride-cancelled", (data) => {
             // alert("Ride Cancelled");
-            toast.info("Ride Cancel")
+            toast.success("Ride Cancel")
             setAcceptRide(false);
             setRide(null);
         })
         socket.on('ride-started', (ride) => {
             // alert("Ride Started");
-            toast.info("Ride Start")
+            toast.success("Ride Start")
             navigate("/caption-rideing", { state: { ride } });
         });
 
@@ -124,9 +124,8 @@ const CaptionHome = () => {
                     Authorization: `Bearer ${localStorage.getItem('captionToken')}`
                 }
             });
-            //console(response.data);
             if (response.status === 200) {
-                //console(ride);
+                console.log(response.data);
             }
         } catch (error) {
             console.error("Error sending message:", error);
@@ -144,8 +143,9 @@ const CaptionHome = () => {
                     Authorization: `Bearer ${localStorage.getItem('captionToken')}`
                 }
             });
-
+            
             if (response.status === 200) {
+                console.log(response.data);
                 setRide(response.data);
                 setRideStarted(true);
                 setOtp("");
@@ -230,20 +230,20 @@ const CaptionHome = () => {
             <div
                 ref={ridePopUpPanelRef}
                 className="z-20 fixed bottom-0 left-0 right-0 px-5 translate-y-full"
-            >
+                >
                 <RidePopUpPanel
                     ride={ride}
                     setRidePopUpPanel={setRidePopUpPanel}
                     setAcceptRide={setAcceptRide}
                     rideAccept={rideAccept}
                     setRideAccepted={setRideAccepted}
-                />
+                    />
             </div>
 
             <div
                 ref={acceptRideRef}
                 className="z-20 fixed bottom-0 left-0 right-0 px-5 bg-white translate-y-full"
-            >
+                >
                 <AcceptRide
                     ride={ride}
                     cancelRide={cancelRide}
@@ -252,7 +252,7 @@ const CaptionHome = () => {
                     startRide={startRide}
                     setOtp={setOtp}
                     otp={otp}
-                />
+                    />
             </div>
         </div>
     );

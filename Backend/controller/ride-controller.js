@@ -97,6 +97,12 @@ module.exports.sendMessage = async (req, res, next) => {
                 data: ride
             })
             return res.status(200).json({message : "Ride Cancelled"});
+        }else if(ride.status === "completed"){
+            sendMessageToSocketId(ride.user.socketID,{
+                event: 'ride-ended',
+                data: ride
+            })
+            return res.status(200).json({message : "Ride Ended"});
         }
         return res.status(400).json({message : "Invalid event"});
         
@@ -144,5 +150,32 @@ module.exports.startRide = async (req, res, next) => {
     } catch (err) {
         console.log(err)
         return res.status(500).json({ message: err.message })
+    }
+}
+
+module.exports.endRide = async (req,res,next)=>{
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+        return res.status(400).json({ error: error.array() });
+    }
+
+    const { rideID } = req.body;
+
+    try{
+        const ride = await rideServices.endRideService({rideID, caption: req.caption});
+        console.log(ride);
+        sendMessageToSocketId(ride.caption.socketID,{
+            event: "ride-ended",
+            data: ride
+        })
+        sendMessageToSocketId(ride.user.socketID,{
+            event: "ride-ended",
+            data: ride
+        })
+
+        return res.status(200).json(ride);
+    }catch(error){
+        console.error("Error sending Message", error);
+        return res.status(500).json({message : error});
     }
 }
