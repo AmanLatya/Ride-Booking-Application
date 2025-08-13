@@ -3,7 +3,7 @@ import userImg from "../assets/user.png";
 
 const RidePopUpPanel = (props) => {
     return (
-        <div className="bg-white p-5 rounded-2xl shadow-xl space-y-4 w-full max-w-md mx-auto border border-gray-200">
+        <div className="bg-white p-5 space-y-4 w-screen max-w-sm mx-auto border border-gray-200">
             <h1 className="text-xl font-medium">New Ride Available</h1>
             {/* Rider Info */}
             <div className="bg-violet-100 p-4 rounded-xl flex justify-between items-center">

@@ -11,7 +11,7 @@ const ConfirmRidePanel = (props) => {
     else if(vehicle == 'auto') img = autoImg;
     
     return (
-        <div className="py-5 px-4 w-full flex flex-col justify-center items-center gap-4">
+        <div className="py-3 h-screen max-w-sm w-screen mx-auto px-6 flex flex-col justify-center items-center gap-5 bg-white">
             {/* Drag Handle */}
             <div
                 onClick={() => {
@@ -24,39 +24,39 @@ const ConfirmRidePanel = (props) => {
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-semibold text-center text-gray-800">
+            <h1 className="text-xl font-semibold text-center text-gray-800">
                 Looking for nearby drivers...
             </h1>
 
             {/* Vehicle Image */}
             <div className="flex justify-center w-full">
-                <img className="h-40 object-contain" src={img} alt="Vehicle" />
+                <img className="h-30 object-contain" src={img} alt="Vehicle" />
             </div>
 
             {/* Pickup Info */}
-            <div className="flex items-center w-full gap-3 px-4 py-3 rounded-xl shadow-sm bg-white">
+            <div className="flex items-center w-full gap-5 px-5 py-3 rounded-xl shadow-sm bg-white">
                 <div className="text-2xl text-green-600">
                     <i className="ri-user-location-line"></i>
                 </div>
                 <div>
                     {/* <h2 className="text-lg font-medium text-gray-900">196 D-S-3</h2> */}
-                    <p className="text-lg ">{props.pickup}</p>
+                    <p className="text-sm ">{props.pickup}</p>
                 </div>
             </div>
 
             {/* Drop Info */}
-            <div className="flex items-center w-full gap-3 px-4 py-3 rounded-xl shadow-sm bg-white">
+            <div className="flex items-center w-full gap-5 px-5 py-3 rounded-xl shadow-sm bg-white">
                 <div className="text-2xl text-red-500">
                     <i className="ri-map-pin-2-fill"></i>
                 </div>
                 <div>
                     {/* <h2 className="text-lg font-medium text-gray-900">SGSITS</h2> */}
-                    <p className="text-lg ">{props.destination}</p>
+                    <p className="text-sm ">{props.destination}</p>
                 </div>
             </div>
 
             {/* Fare Info */}
-            <div className="flex items-center w-full gap-3 px-4 py-3 rounded-xl shadow-sm bg-white">
+            <div className="flex items-center w-full gap-5 px-5 py-3 rounded-xl shadow-sm bg-white">
                 <div className="text-2xl text-yellow-600">
                     <i className="ri-wallet-fill"></i>
                 </div>
@@ -74,7 +74,7 @@ const ConfirmRidePanel = (props) => {
                     props.createRide()
                     // console.log()
                 }}
-                className="w-full bg-green-500 text-white text-xl font-semibold py-3 rounded-2xl hover:bg-green-600 transition duration-200"
+                className="w-full bg-green-500 text-white text-md font-semibold py-2 rounded-2xl hover:bg-green-600 transition duration-200"
             >
                 Confirm Ride
             </button>

@@ -1,11 +1,10 @@
 import React from "react";
 
-const LocationSearchPanel = ({ suggestions, setDestinationCoords, setPickupCoords, setVehiclePanel, setPanel, setPickup, setDestination, activeField }) => {
+const LocationSearchPanel = ({ suggestions, setDestinationCoords, setPickupCoords, setPickup, setDestination, activeField }) => {
 
     // console.log(suggestions)
 
     const handleSuggestionsClick = (suggestion) => {
-        console.log(suggestion)
         const { description, coordinates } = suggestion;
 
         if (activeField === 'pickup') {
@@ -22,7 +21,7 @@ const LocationSearchPanel = ({ suggestions, setDestinationCoords, setPickupCoord
 
     return (
 
-        <div className="flex flex-col gap-3 h-full overflow-y-auto p-4 border border-gray-300 rounded-lg shadow-lg bg-gray-50">
+        <div className="flex flex-col gap-3 p-4 border border-gray-300 rounded-lg shadow-lg bg-gray-50 fixed z-30 h-screen max-w-sm w-screen">
             {
                 suggestions.length === 0 ? (
                     <p className="text-gray-500 text-center">No suggestions found</p>

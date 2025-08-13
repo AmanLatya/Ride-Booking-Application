@@ -43,7 +43,6 @@ function initializeSocket(server) {
             })
         })
 
-        io.emit('test', "Message sent");
         socket.on("disconnect", () => {
             console.log("User disconnected: " + socket.id);
         });

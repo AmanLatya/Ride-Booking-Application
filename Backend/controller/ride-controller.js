@@ -22,7 +22,7 @@ module.exports.createRide = async (req, res, next) => {
         const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate('user');
         CaptionsInRadius.map((caption) => {
             // console.log(caption, ride);
-            if (caption.socketID != null) {
+            if (caption.socketID != null && caption.vehicle.vehicleType === ride.vehicleType && caption.status == "active") {
                 sendMessageToSocketId(caption.socketID, {
                     event: 'new-ride',
                     data: rideWithUser
@@ -122,7 +122,7 @@ module.exports.cancleRide = async (req, res, next) => {
 
     try {
         const ride = await rideServices.cancleRideService({ rideID });
-        console.log("Cont - 119 ", ride.status);
+        // console.log("Cont - 119 ", ride);
         return res.status(200).json(ride);
     } catch (err) {
         console.log(err);
@@ -140,7 +140,6 @@ module.exports.startRide = async (req, res, next) => {
 
     try {
         const ride = await rideServices.startRide({ rideID, otp });
-        console.log("Cont 128 : ", ride);
         sendMessageToSocketId(ride.caption.socketID, {
             event: 'ride-started',
             data: ride

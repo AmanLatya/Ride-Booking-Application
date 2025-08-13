@@ -3,14 +3,11 @@ import {io} from 'socket.io-client';
 // Create the context
 export const SocketContext = createContext();
 
-
 const socket = io(`${import.meta.env.VITE_BASE_URL}`);
 
 // Socket provider component
 const SocketProvider = ({ children }) => {
-
     useEffect(() => {
-        // Replace with your backend socket server URL
         socket.on('connect', () => {
             console.log(`Connected to the server , ${socket.id}`);
         })
@@ -18,7 +15,6 @@ const SocketProvider = ({ children }) => {
         socket.on('disconnect', () => {
             console.log("Disconnected to the server")
         })
-
     }, []);
 
     return (

@@ -46,7 +46,7 @@ const CaptionSignUp = () => {
 
 
   return (
-    <div className="bg-cover bg-center bg-[url('https://images.unsplash.com/photo-1678964101682-26a0906972ad?q=80&w=1171&auto=format&fit=crop')] min-h-screen flex items-center justify-center px-4">
+    <div className="bg-cover bg-center w-full max-w-sm mx-auto bg-[url('https://images.unsplash.com/photo-1678964101682-26a0906972ad?q=80&w=1171&auto=format&fit=crop')] min-h-screen flex items-center justify-center px-4">
       <div className="relative z-10 bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md text-black">
         <div className="flex justify-center mb-6">
           <img

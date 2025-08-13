@@ -1,7 +1,7 @@
 const captionModel = require('../models/caption-model');
 
 module.exports.createCaption = async ({
-    firstName,lastName, email, password, color,vehicleNumber, vehicleType, latitude, longitude
+    firstName,lastName, email, password,vehicleNumber, vehicleType, latitude, longitude
 })=>{
     if(!firstName || !email || !password  || !vehicleNumber || !vehicleType){
         throw new Error("All Fields required");
@@ -18,6 +18,7 @@ module.exports.createCaption = async ({
             vehicleNumber,
             vehicleType
         },
+        status:"active",
         location: {
             latitude: latitude || null,
             longitude: longitude || null

@@ -11,6 +11,8 @@ import { SocketContext } from "../context/socketContext";
 import { CaptionDataContext } from "../context/captionContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import MapView from "../components/MapView";
+import CompleteCaptionProfile from "../components/completeCaptionProfile";
 
 const CaptionHome = () => {
     const [captionDetailsPanel, setCaptionDetailsPanel] = useState(true);
@@ -21,7 +23,10 @@ const CaptionHome = () => {
     const [otp, setOtp] = useState("");
     const [rideStarted, setRideStarted] = useState(false);
     const [rideCancelled, setRideCancelled] = useState(false);
+    const [completeProfile, setCompleteProfile] = useState(false);
 
+
+    const captionCompleteProfileRef = useRef(null)
     const captionDetailsPanelRef = useRef(null);
     const ridePopUpPanelRef = useRef(null);
     const acceptRideRef = useRef(null);
@@ -30,6 +35,9 @@ const CaptionHome = () => {
 
     const { socket } = useContext(SocketContext);
     const { caption } = useContext(CaptionDataContext);
+
+    const [location, setlocation] = useState(null);
+
 
     useEffect(() => {
         socket.emit("join", {
@@ -40,17 +48,20 @@ const CaptionHome = () => {
         const updateLocation = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
+                    const location = {
+                        ltd: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    setlocation(location);
                     socket.emit('update-loction-caption', {
                         userId: caption._id,
-                        location: {
-                            ltd: position.coords.latitude,
-                            lng: position.coords.longitude
-                        }
+                        location
                     });
                 });
             }
         };
-        const locationInterval = setInterval(updateLocation, 10000);
+
+        const locationInterval = setInterval(updateLocation, 3000);
         updateLocation();
 
         socket.on('new-ride', (data) => {
@@ -74,11 +85,19 @@ const CaptionHome = () => {
     }, [socket]);
 
     useEffect(() => {
+        if (caption.profile === false) {
+            setCompleteProfile(true);
+            setCaptionDetailsPanel(false);
+        }
+    }, [caption]);
+
+    useEffect(() => {
         if (rideAccepted) {
             sendMessage();
             setRideAccepted(false);
         }
     }, [rideAccepted]);
+
 
     useEffect(() => {
         if (rideStarted) {
@@ -143,16 +162,17 @@ const CaptionHome = () => {
                     Authorization: `Bearer ${localStorage.getItem('captionToken')}`
                 }
             });
-            
+
             if (response.status === 200) {
-                console.log(response.data);
+                // console.log(response.data);
                 setRide(response.data);
                 setRideStarted(true);
                 setOtp("");
             }
         } catch (err) {
-            console.error("Start ride failed:", err);
-            alert("Invalid OTP or ride not found");
+            // console.error("Start ride failed:", err);
+            // alert("Invalid OTP or ride not found");
+            toast.error("Invalid OTP or ride not found");
         }
     }
 
@@ -183,6 +203,14 @@ const CaptionHome = () => {
     }
 
     useGSAP(() => {
+        gsap.to(captionCompleteProfileRef.current, {
+            y: completeProfile ? 0 : "100%",
+            duration: 0.5,
+            ease: "power2.out"
+        });
+    }, [completeProfile]);
+
+    useGSAP(() => {
         gsap.to(captionDetailsPanelRef.current, {
             y: captionDetailsPanel ? 0 : "100%",
             duration: 0.5,
@@ -207,43 +235,62 @@ const CaptionHome = () => {
     }, [acceptRide]);
 
     return (
-        <div className="relative h-screen w-full overflow-hidden">
-            <img src={mapImg} className="absolute top-0 left-0 h-full w-full object-cover" alt="Map" />
+        <div className="relative h-screen w-full max-w-sm mx-auto overflow-hidden shadow-2xl">
+            {/* Map Background */}
+            {/* <img src={mapImg} className="h-screen w-full object-cover absolute" alt="Map" /> */}
+            <div className="absolute h-screen w-full z-0">
+                <MapView location={location} />
+            </div>
 
-            <div className="z-10 fixed top-5 left-0 right-0 flex justify-between items-center px-6">
-                <img src={uberLogo} className="h-9" alt="Uber Logo" />
+            {/* Uber Logo */}
+            {/* <img src={uberLogo} className="absolute w-24 top-5 left-5" alt="Uber Logo" /> */}
+
+            {/* <div className="z-10 fixed top-5 left-0 right-0 flex justify-between items-center px-6">
                 <Link
                     to="/caption-home"
                     className="text-2xl flex items-center justify-center bg-white shadow-md h-12 w-12 rounded-full"
                 >
                     <i className="ri-home-line"></i>
                 </Link>
-            </div>
+            </div> */}
+
+
 
             <div
-                ref={captionDetailsPanelRef}
-                className="z-10 fixed bottom-0 left-0 right-0 translate-y-full bg-white rounded-t-3xl shadow-2xl px-5 pt-4 pb-7"
+                ref={captionCompleteProfileRef}
+                className="z-20 fixed bottom-0 translate-y-full"
             >
-                <CaptionDetails setCaptionDetailsPanel={setCaptionDetailsPanel} />
+                <CompleteCaptionProfile
+                    caption={caption}
+                    setCompleteProfile={setCompleteProfile}
+                    setCaptionDetailsPanel={setCaptionDetailsPanel} />
+            </div>
+            <div
+                ref={captionDetailsPanelRef}
+                className="z-20 fixed bottom-0 translate-y-full"
+            >
+                <CaptionDetails
+                    caption={caption}
+                    setCaptionDetailsPanel={setCaptionDetailsPanel} />
             </div>
 
             <div
                 ref={ridePopUpPanelRef}
-                className="z-20 fixed bottom-0 left-0 right-0 px-5 translate-y-full"
-                >
+                className="z-20 fixed bottom-0 translate-y-full"
+            >
                 <RidePopUpPanel
                     ride={ride}
                     setRidePopUpPanel={setRidePopUpPanel}
                     setAcceptRide={setAcceptRide}
                     rideAccept={rideAccept}
                     setRideAccepted={setRideAccepted}
-                    />
+                />
             </div>
 
             <div
                 ref={acceptRideRef}
-                className="z-20 fixed bottom-0 left-0 right-0 px-5 bg-white translate-y-full"
-                >
+                className="z-20 fixed bottom-0 translate-y-full"
+            >
                 <AcceptRide
                     ride={ride}
                     cancelRide={cancelRide}
@@ -252,7 +299,7 @@ const CaptionHome = () => {
                     startRide={startRide}
                     setOtp={setOtp}
                     otp={otp}
-                    />
+                />
             </div>
         </div>
     );

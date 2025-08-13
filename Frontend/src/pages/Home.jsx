@@ -15,6 +15,10 @@ import { SocketContext } from "../context/socketContext";
 import { UserDataContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import L from "leaflet";
+import MapView from "../components/MapView";
+
 
 const Home = () => {
     const [pickup, setPickup] = useState("");
@@ -50,6 +54,26 @@ const Home = () => {
     const { user } = useContext(UserDataContext);
 
     const navigate = useNavigate();
+    const [location, setlocation] = useState(null);
+
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const location = {
+                        ltd: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    setlocation(location);
+                    console.log("User location:", location);
+                },
+                error => {
+                    console.error("Geolocation error:", error);
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+    }, []);
 
 
     useEffect(() => {
@@ -57,23 +81,18 @@ const Home = () => {
         socket.emit("join", { userType: "user", userId: user._id });
 
         socket.on("ride-accepted", (data) => {
-            // alert("Ride Accepted");
             toast.success("Ride Accecpt");
-            //console("Your ride was accepted:", data);
             setSearchingDriverPanel(false);
             setWaitingDriverPanel(true);
             setRide(data);
-            // You can now show toast or redirect user
         });
 
         socket.on("ride-started", (data) => {
-            // alert("Ride Started");
             toast.success("Ride Start");
             navigate('/user-rideing', { state: { data } });
         })
 
         socket.on("ride-cancelled", (data) => {
-            // alert("Ride Cancelled");
             toast.success("Ride Cancel")
             setWaitingDriverPanel(false);
         })
@@ -124,7 +143,8 @@ const Home = () => {
             })
             setPickupSuggestions(response.data);
         } catch (err) {
-
+            // toast.info("Location not found");
+            console.error(err);
         }
     }
 
@@ -148,7 +168,7 @@ const Home = () => {
 
             setDestinationSuggestions(response.data);
         } catch (err) {
-
+            console.error(err);
         }
     }
 
@@ -174,7 +194,7 @@ const Home = () => {
 
             // Handle error response message from server
             setErrorPopUpPanel(true);
-            setError("Rides not availabel");
+            setError("Location Not Found!");
         }
     }
 
@@ -184,18 +204,23 @@ const Home = () => {
         else if (vehicleType == 'bike') rideFare = fare.bike;
         else if (vehicleType == 'auto') rideFare = fare.auto;
 
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
-            pickup,
-            pickupCoords,
-            destination,
-            destinationCoords,
-            vehicleType,
-            rideFare
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('userToken')}`
-            }
-        })
+        try {
+
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
+                pickup,
+                pickupCoords,
+                destination,
+                destinationCoords,
+                vehicleType,
+                rideFare
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('userToken')}`
+                }
+            })
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async function sendMessage() {
@@ -219,24 +244,29 @@ const Home = () => {
     }
 
     async function cancelRide() {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/cancel`, {
-            params: {
-                rideID: ride._id
-            },
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('userToken')}`
+        try {
+
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/cancel`, {
+                params: {
+                    rideID: ride._id
+                },
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('userToken')}`
+                }
+            })
+            if (response.status === 200) {
+                setRide(response.data);
+                setRideCancelled(true);
             }
-        })
-        if (response.status === 200) {
-            setRide(response.data);
-            setRideCancelled(true);
+        } catch (err) {
+            console.error(err);
         }
     }
     // Panel animations
     useGSAP(() => {
         gsap.to(panelRef.current, {
-            height: panel ? "65%" : "0%",
-            padding: panel ? 20 : 0,
+            y: panel ? 0 : "100%",
+            // padding: panel ? 20 : 0,
             duration: 0.3,
             ease: "power2.out",
         });
@@ -287,16 +317,21 @@ const Home = () => {
     }, [errorPopUpPanel]);
 
     return (
-        <div className="h-screen relative overflow-hidden">
+        <div className="h-screen relative overflow-hidden max-w-sm w-full mx-auto shadow-2xl">
             {/* Map Background */}
-            <img src={mapImg} className="h-screen w-full object-cover absolute" alt="Map" />
+            {/* <img src={mapImg} className="h-screen w-full object-cover absolute" alt="Map" /> */}
+            <div className="absolute h-screen w-full z-0">
+                <MapView location={location} />
+            </div>
+
 
             {/* Uber Logo */}
-            <img src={uberLogo} className="absolute w-24 top-5 left-5" alt="Uber Logo" />
+            {/* <img src={uberLogo} className="absolute w-24 top-5 left-5" alt="Uber Logo" /> */}
 
             {/* Ride Form */}
-            <div className="absolute top-0 w-full flex flex-col justify-end h-screen z-10">
-                <div className="bg-white p-5 relative rounded-t-3xl shadow-lg">
+            <div ref={panelRef} 
+            className="fixed bottom-60 w-screen max-w-sm flex flex-col justify-end z-10">
+                <div className="bg-white p-5 relative shadow-lg">
                     <span
                         className="text-xl absolute right-7 top-5 cursor-pointer"
                         onClick={() => setPanel(false)}
@@ -357,19 +392,17 @@ const Home = () => {
                 {/* Error Panel */}
                 <div
                     ref={errorPopUpPanelRef}
-                    className="z-20 fixed bottom-0 flex items-center justify-center w-full h-screen translate-y-full"
+                    className="z-20 fixed bottom-0 flex items-center justify-center w-full max-w-sm mx-auto h-screen translate-y-full"
                 >
                     <ErrorPopUp setErrorPopUpPanel={setErrorPopUpPanel} error={error} />
                 </div>
 
                 {/* Location Search Panel */}
-                <div ref={panelRef} className="bg-white overflow-y-auto max-h-[70%] rounded-t-2xl">
+                <div ref={panelRef} className="bg-green-300 shadow-2xl">
                     <LocationSearchPanel
                         suggestions={activeField === 'pickup' ? pickupSuggestions : destinationSuggestions}
                         setPickupCoords={setPickupCoords}
                         setDestinationCoords={setDestinationCoords}
-                        setPanel={setPanel}
-                        setVehiclePanel={setVehiclePanel}
                         setPickup={setPickup}
                         setDestination={setDestination}
                         activeField={activeField}
@@ -380,7 +413,7 @@ const Home = () => {
                 {/* Vehicle Options Panel */}
                 <div
                     ref={vehiclePanelRef}
-                    className="z-20 fixed bg-white px-6 pb-7 pt-5 translate-y-full w-full bottom-0 rounded-t-2xl shadow-2xl"
+                    className="z-20 fixed translate-y-full bottom-0 shadow-2xl"
                 >
                     <VehiclePanel
                         setPanel={setPanel}
@@ -394,7 +427,7 @@ const Home = () => {
                 {/* Confirm Ride Panel */}
                 <div
                     ref={confirmRidePanelRef}
-                    className="z-20 fixed bg-white px-6 pb-7 pt-5 translate-y-full w-full bottom-0 rounded-t-2xl shadow-2xl"
+                    className="z-20 fixed translate-y-full bottom-0 shadow-2xl"
                 >
                     <ConfirmRidePanel
                         createRide={createRide}
@@ -411,7 +444,7 @@ const Home = () => {
                 {/* Searching for driver ride panel */}
                 <div
                     ref={searchingDriverPanelRef}
-                    className="z-20 fixed bg-white px-6 pb-7 pt-5 translate-y-full w-full bottom-0 rounded-t-2xl shadow-2xl"
+                    className="z-20 fixed translate-y-full bottom-0 shadow-2xl"
                 >
                     <SearchingForDriver
                         createRide={createRide}
@@ -419,8 +452,6 @@ const Home = () => {
                         destination={destination}
                         fare={fare}
                         vehicleType={vehicleType}
-                        setVehiclePanel={setVehiclePanel}
-                        setConfirmRidePanel={setConfirmRidePanel}
                         setSearchingDriverPanel={setSearchingDriverPanel}
                     />
                 </div>
@@ -428,7 +459,7 @@ const Home = () => {
                 {/* Waiting for Driver Panel */}
                 <div
                     ref={waitingDriverRef}
-                    className="z-20 fixed bg-white px-6 pb-7 pt-5 translate-y-full w-full bottom-0 rounded-t-2xl shadow-2xl"
+                    className="z-20 fixed bg-white translate-y-full bottom-0 shadow-2xl"
                 >
                     <WaitingDriver
                         waitingDriverPanel={waitingDriverPanel}

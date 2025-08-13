@@ -2,7 +2,7 @@ const rideModel = require("../models/ride-model");
 const { sendMessageToSocketId } = require("../socket");
 const mapServices = require("./maps-services");
 const crypto = require('crypto');
-
+const captionModel = require("../models/caption-model");
 async function generateOTP(digits) {
     // Generate a random OTP with specified number of digits
     const min = Math.pow(10, digits - 1);
@@ -63,7 +63,7 @@ module.exports.createRideService = async ({
     const dy = destinationCoords[1] - pickupCoords[1];
 
     const distance = Math.ceil(Math.sqrt(dx ** 2 + dy ** 2) * 100);
-    console.log("66 - ",distance);
+    console.log("66 - ", distance);
     // const fare = await getFare(pickup, destination);
     const ride = await rideModel.create({
         user,
@@ -137,6 +137,16 @@ module.exports.cancleRideService = async ({ rideID }) => {
 
     if (!ride) throw new Error("Ride Not Found");
 
+    if (ride && ride.caption) {
+        await captionModel.findByIdAndUpdate(
+            ride.caption._id,
+            { $inc: { 'rideDetails.cancelledRide': 1 } },
+            { new: true } // optional: return updated doc
+        );
+
+        // console.log("Service 145 : ", caption);
+    }
+
     return ride;
 }
 
@@ -175,34 +185,56 @@ module.exports.startRide = async ({ rideID, otp }) => {
 }
 
 
-module.exports.endRideService = async ({rideID, caption}) =>{
-    if(!rideID || !caption){
+module.exports.endRideService = async ({ rideID, caption }) => {
+    if (!rideID || !caption) {
         throw new error("All fields required");
     }
 
     const ride = await rideModel.findOne({
-        _id : rideID,
+        _id: rideID,
         caption: caption._id
     })
 
-    if(!ride){
+    if (!ride) {
         throw new error("Ride Not Found");
     }
 
     // if(ride.status != "ongoing" && ride.distance != 0){
-    if(ride.status != "ongoing"){
+    if (ride.status != "ongoing") {
         throw new error("Ride is Not Ongoing");
     }
 
     await rideModel.findByIdAndUpdate({
-        _id : rideID
-    },{
-        status : "completed"
+        _id: rideID
+    }, {
+        status: "completed"
     })
 
     const updatedRide = await rideModel.findOne({
-        _id : rideID
+        _id: rideID
     }).populate("user").populate("caption");
+
+    if (updatedRide && updatedRide.caption) {
+        const distance = updatedRide.distance || 0;
+        const fare = updatedRide.fare || 0;
+
+        const captionUpdate = await captionModel.findByIdAndUpdate(
+            updatedRide.caption._id,
+            {
+                $inc: {
+                    'rideDetails.completedRide': 1,
+                    'rideDetails.distanceTravel': distance,
+                    'rideDetails.income.daily': fare,
+                    'rideDetails.income.monthly': fare,
+                    'rideDetails.income.total': fare
+                }
+            },
+            { new: true }
+        );
+
+        // console.log("Updated caption stats:", captionUpdate);
+    }
+
 
     return updatedRide;
 }

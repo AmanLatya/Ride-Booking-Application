@@ -7,42 +7,68 @@ const CaptionLogin = () => {
 
   const captionToken = localStorage.getItem("captionToken");
   const navigate = useNavigate();
-  useEffect(() =>{
-    if(captionToken){
+  useEffect(() => {
+    if (captionToken) {
       navigate("/caption-home");
     }
-  },[captionToken, navigate]);
+  }, [captionToken, navigate]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const {caption, setCaption} = useContext(CaptionDataContext);
+  const { caption, setCaption } = useContext(CaptionDataContext);
 
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const data = {
       email: email,
       password: password
     }
 
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captions/login`, data);
-    
 
-    if(response.status === 200){
-      const data = response.data;
-      setCaption(data.caption);
-      localStorage.setItem("captionToken", data.token);
-      console.log("Caption logged in successfully:", data);
-      navigate("/caption-home");
+    // Inside handleSubmit:
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captions/login`, data);
+
+      if (response.status === 200) {
+        const data = response.data;
+        setCaption(data.caption);
+        localStorage.setItem("captionToken", data.token);
+        navigate("/caption-home");
+        setErrorMessage(""); // Clear any previous errors
+      }
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      // console.error("Login Error:", err);
+      if (err.response && err.response.status === 401) {
+        setErrorMessage("Invalid Credentials");
+      } else if (err.response && err.response.status === 404) {
+        setErrorMessage("Caption Not Found");
+      }
+      else {
+        setErrorMessage("Something went wrong. Please try again.");
+      }
     }
-    setEmail("");
-    setPassword("");
+
   };
 
+  const handleGoogleLogin = (role) => {
+    const baseURL = import.meta.env.VITE_BASE_URL;
+    const redirectURL =
+      role === "user"
+        ? `${baseURL}/api/auth/google/user`
+        : `${baseURL}/api/auth/google/caption`;
+
+    window.open(redirectURL, "_self");
+  };
+
+
   return (
-    <div className="bg-cover bg-center bg-[url(https://images.unsplash.com/photo-1678964101682-26a0906972ad?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)] min-h-screen flex items-center justify-center px-4">
-      <div className="relative z-10 bg-white/20 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full max-w-md text-black">
+    <div className="bg-cover bg-center w-full max-w-sm mx-auto bg-[url(https://images.unsplash.com/photo-1678964101682-26a0906972ad?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)] min-h-screen flex items-center justify-center px-4">
+      <div className="relative z-10 bg-white/20 backdrop-blur-xs p-8 rounded-2xl shadow-lg w-full max-w-md text-black">
         <div className="flex justify-center mb-6">
           <img
             className="w-40"
@@ -51,7 +77,7 @@ const CaptionLogin = () => {
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-2">
           <div>
             <label className="block text-black-700 text-lg font-medium mb-1">
               What is your email
@@ -94,7 +120,21 @@ const CaptionLogin = () => {
           >
             Login
           </button>
+          {errorMessage && (
+            <p className="text-red-500 text-sm font-bold">{errorMessage}</p>
+          )}
+
         </form>
+<button
+  onClick={() => handleGoogleLogin("caption")}
+  type="button"
+  className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-black py-2 hover:bg-gray-100 transition duration-200 mt-3 rounded-xl"
+>
+  <img src="https://img.icons8.com/color/16/google-logo.png" alt="Google" />
+  Login with Google
+</button>
+
+
         <p className="pt-4 text-lg">Join? <Link to='/caption-signup' className="text-blue-600 font-medium">Register</Link></p>
 
         <div className="mt-6 text-center">

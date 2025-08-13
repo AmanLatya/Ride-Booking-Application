@@ -10,14 +10,14 @@ const RideInvitation = (props) => {
     }
 
     return (
-        <div className="p-5 space-y-4 w-screen max-w-md mx-auto">
+        <div className="bg-white space-y-4 w-screen max-w-sm mx-auto flex flex-col justify-center px-5 h-screen">
             {/* Rider Info */}
             <h1 className="text-2xl font-semibold">Client is waiting for the pickup location</h1>
             <div className="bg-violet-100 p-4 rounded-xl flex justify-between items-center">
                 <div className="flex items-center gap-4">
                     <img className="h-14 w-14 object-cover rounded-full border border-white shadow-sm" src={userImg} alt="User" />
                     <div>
-                        <h2 className="font-semibold text-gray-800 text-lg capitalize">{props.ride?.user.fullName.firstName + " " + props.ride?.user.fullName.lastName}</h2>
+                        <h2 className="font-semibold text-gray-800 text-lg capitalize">{props.ride?.user.fullName.firstName}</h2>
                         {/* <span className="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-medium">10% Discount</span> */}
                     </div>
                 </div>

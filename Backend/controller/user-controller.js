@@ -12,7 +12,7 @@ async function handleUserRegister(req, res, next) {
     const { fullName, email, password } = req.body;
     const isEmailExists = await userModel.findOne({ email });
     if (isEmailExists) {
-        return res.status(400).json({ message: "User already exists" });
+        return res.status(401).json({ message: "User already exists" });
     }
 
     try{
@@ -25,10 +25,10 @@ async function handleUserRegister(req, res, next) {
         })
     
         const token = await user.generateAuthToken();
-        res.status(201).json({ token, user })
+        return res.status(201).json({ token, user })
     }catch (err) {
         // console.error("Error during user registration:", err);
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ message: err.message });
     }
 
 }
@@ -41,7 +41,7 @@ async function handleUserLogin(req, res, next) {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email }).select("+password");
     if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(404).json({ message: "User Not Found" });
     }
     const isPasswordValid = await user.compareHashedDetails(password);
     if (!isPasswordValid) {
@@ -50,10 +50,8 @@ async function handleUserLogin(req, res, next) {
 
     const token = await user.generateAuthToken();
     res.cookie('userToken', token)
-    res.status(200).json({msg: "Login successful", token, user });
+    return res.status(200).json({msg: "Login successful", token, user });
 }
-
-
 
 async function handleGetUserProfile(req, res, next) {
     const user = req.user;
@@ -61,7 +59,7 @@ async function handleGetUserProfile(req, res, next) {
         return res.status(404).json({ message: "User not found" });
     }
     // console.log("User profile:", user);
-    res.status(200).json({Profile: "User Profile", user });
+    return res.status(200).json({Profile: "User Profile", user });
 };
 
 async function handleUserLogout(req, res, next) {
@@ -76,7 +74,12 @@ async function handleUserLogout(req, res, next) {
     }
     // Add the token to the blacklist
     await blackListModel.create({ token });
-    res.status(200).json({ message: "Logged out successfully" });
+    await userModel.findByIdAndUpdate({
+        _id:user._id
+    },{
+        socketID: null
+    })
+    return res.status(200).json({ message: "Logged out successfully" });
 }
 
 module.exports = {

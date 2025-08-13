@@ -7,20 +7,48 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { toast } from "react-toastify";
 import { SocketContext } from "../context/socketContext";
+import MapView from "../components/MapView";
+import { CaptionDataContext } from "../context/captionContext";
 
 
 const CaptionRideing = (props) => {
-    
     const [rideDetailPanel, setRideDetailPanel] = useState(false);
     const rideDetailPanelRef = useRef(null);
-    const location = useLocation();
-    const rideData = location.state?.ride;
+    const loc = useLocation();
+    const rideData = loc.state?.ride;
+    const [location, setlocation] = useState(null);
 
-    const {socket} = useContext(SocketContext);
+    const { caption } = useContext(CaptionDataContext);
+
+
+    const { socket } = useContext(SocketContext);
     useEffect(() => {
         socket.on("ride-ended", (data) => {
             toast.success("Ride End")
         })
+
+
+        const updateLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const location = {
+                        ltd: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    setlocation(location);
+                    socket.emit('update-loction-caption', {
+                        userId: caption._id,
+                        location
+                    });
+                });
+            }
+        };
+
+        const locationInterval = setInterval(updateLocation, 3000);
+        updateLocation();
+
+        return () => clearInterval(locationInterval);
+
     }, [socket])
 
     useGSAP(function () {
@@ -35,27 +63,24 @@ const CaptionRideing = (props) => {
         }
     }, [rideDetailPanel])
     return (
-        <div className="relative h-screen w-full overflow-hidden">
-            {/* Background Map */}
-            <img src={mapImg} className="absolute top-0 left-0 h-full w-full object-cover" alt="Map" />
-
-            {/* Top Nav */}
-            <div className="z-10 fixed top-5 left-0 right-0 flex justify-between items-center px-6">
-                <img src={uberLogo} className="h-9" alt="Uber Logo" />
-                <Link
-                    to="/caption-home"
-                    className="text-2xl flex items-center justify-center bg-white shadow-md h-12 w-12 rounded-full"
-                >
-                    <i className="ri-home-line"></i>
-                </Link>
+        <div className="relative h-screen w-full max-w-sm mx-auto overflow-hidden shadow-2xl">
+            {/* Map Background */}
+            {/* <img src={mapImg} className="h-screen w-full object-cover absolute" alt="Map" /> */}
+            <div className="absolute h-screen w-full z-0">
+                <MapView location={location} />
             </div>
+
+
+            {/* Uber Logo */}
+            <img src={uberLogo} className="absolute w-24 top-5 left-5" alt="Uber Logo" />
+            {/* Top Nav */}
 
             {/* Caption Details Panel */}
             <div
                 onClick={() => {
                     setRideDetailPanel(true)
                 }}
-                className="z-10 fixed bottom-0 left-0 right-0 bg-yellow-300 rounded-t-xl shadow-2xl px-5 "
+                className="z-10 fixed bottom-0 bg-yellow-300 px-5 w-screen max-w-sm mx-auto"
             >
                 <div className="flex justify-around items-center w-full py-5">
                     <h1 className="text-xl font-semibold">{rideData.distance} KM Away</h1>
@@ -70,7 +95,7 @@ const CaptionRideing = (props) => {
 
             <div
                 ref={rideDetailPanelRef}
-                className="z-20 fixed bottom-0 left-0 right-0 px-5 bg-white translate-y-full"
+                className="z-20 fixed bottom-0 bg-white translate-y-full"
             >
                 <RideDetail
                     setRideDetailPanel={setRideDetailPanel}

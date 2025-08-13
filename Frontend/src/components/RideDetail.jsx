@@ -52,7 +52,7 @@ const RideDetail = (props) => {
     }
 
     return (
-        <div className="bg-white p-5 space-y-4 w-full max-w-md mx-auto ">
+        <div className="bg-white p-5 space-y-4 w-screen max-w-sm mx-auto">
             <div
                 onClick={() => {
                     props.setRideDetailPanel(false)

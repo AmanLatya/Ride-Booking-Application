@@ -1,4 +1,4 @@
-import React, {use, useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../context/userContext";
 import axios from "axios";
@@ -8,41 +8,51 @@ const UserSignUp = () => {
     const [password, setPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
-    // const [userData, setUserData] = useState({});
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const {user,setUser} = useContext(UserDataContext);
+    const { setUser } = useContext(UserDataContext);
     const navigate = useNavigate();
-    const handleSubmit = async(e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // handle form submission here
+
         const newUser = {
-            fullName:{
-                firstName: firstName,
-                lastName: lastName,
+            fullName: {
+                firstName,
+                lastName,
             },
-            email: email,
-            password: password,
-        }
-        
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
+            email,
+            password,
+        };
 
-        if(response.status === 201){
-            const data = response.data;
-            setUser(data.user)
-            console.log("User registered successfully:", response.data);
-            localStorage.setItem("userToken", data.token);
-            navigate("/home");
-        }
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
 
-        // setUserData(newUser);
-        setEmail("");
-        setPassword("");
-        setFirstName("");   
-        setLastName("");
+            if (response.status === 201) {
+                const data = response.data;
+                setUser(data.user);
+                localStorage.setItem("userToken", data.token);
+                navigate("/home");
+            }
+
+            setEmail("");
+            setPassword("");
+            setFirstName("");
+            setLastName("");
+            setErrorMessage("");
+        } catch (err) {
+            if (err.response?.status === 401) {
+                setErrorMessage("User already exists.");
+            } else if (err.response?.status === 400) {
+                setErrorMessage("Password must be at least 6 characters.");
+            } else {
+                setErrorMessage("Something went wrong. Please try again.");
+            }
+        }
     };
 
     return (
-        <div className="bg-cover bg-center bg-[url(https://images.unsplash.com/32/Mc8kW4x9Q3aRR3RkP5Im_IMG_4417.jpg?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)] min-h-screen flex items-center justify-center px-4">
+        <div className="bg-cover bg-center w-full max-w-sm mx-auto bg-[url(https://images.unsplash.com/32/Mc8kW4x9Q3aRR3RkP5Im_IMG_4417.jpg?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)] min-h-screen flex items-center justify-center px-4">
             <div className="relative z-10 bg-white/20 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full max-w-md text-black">
                 <div className="flex justify-center mb-6">
                     <img
@@ -54,27 +64,20 @@ const UserSignUp = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-black-700 text-lg font-medium mb-2">
-                            What's your name
-                        </label>
+                        <label className="block text-black-700 text-lg font-medium mb-2">What's your name</label>
                         <div className="flex space-x-2">
                             <input
-                                value={firstName}
-                                onChange = {(e) =>{
-                                    setFirstName(e.target.value);
-                                }}
                                 type="text"
                                 required
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
                                 placeholder="First Name"
                                 className="w-1/2 px-4 py-2 border border-gray-300 rounded-xl placeholder:text-base font-medium focus:outline-none focus:ring-2 focus:ring-black"
-                            
                             />
                             <input
-                                value={lastName}
-                                onChange = {(e) =>{
-                                    setLastName(e.target.value);
-                                }}
                                 type="text"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
                                 placeholder="Last Name"
                                 className="w-1/2 px-4 py-2 border border-gray-300 rounded-xl placeholder:text-base font-medium focus:outline-none focus:ring-2 focus:ring-black"
                             />
@@ -82,36 +85,32 @@ const UserSignUp = () => {
                     </div>
 
                     <div>
-                        <label className="block text-black-700 text-lg font-medium mb-1">
-                            What is your email
-                        </label>
+                        <label className="block text-black-700 text-lg font-medium mb-1">What is your email</label>
                         <input
-                            value={email}
-                            onChange = {(e) =>{
-                                setEmail(e.target.value);
-                            }}
-                            required
                             type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="example@gmail.com"
                             className="w-full px-4 py-2 border border-gray-300 rounded-xl placeholder:text-base font-medium focus:outline-none focus:ring-2 focus:ring-black"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-black-700 text-lg font-medium mb-1">
-                            Enter Password
-                        </label>
+                        <label className="block text-black-700 text-lg font-medium mb-1">Enter Password</label>
                         <input
-                            value={password}
-                            onChange = {(e) =>{
-                                setPassword(e.target.value);
-                            }}
-                            required
                             type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="Password"
                             className="w-full px-4 py-2 border border-gray-300 rounded-xl placeholder:text-base font-medium focus:outline-none focus:ring-2 focus:ring-black"
                         />
                     </div>
+
+                    {errorMessage && (
+                        <p className="text-red-500 text-sm font-bold text-center -mt-4">{errorMessage}</p>
+                    )}
 
                     <button
                         type="submit"
@@ -127,16 +126,6 @@ const UserSignUp = () => {
                         Login
                     </Link>
                 </p>
-
-                {/* Optional Captain Signin Button */}
-                {/* <div className="mt-6 text-center">
-                    <Link
-                        to="/caption-login"
-                        className="inline-block bg-yellow-500 text-white py-2 px-4 rounded-xl hover:bg-yellow-600 transition duration-200"
-                    >
-                        Sign in as Captain
-                    </Link>
-                </div> */}
             </div>
         </div>
     );

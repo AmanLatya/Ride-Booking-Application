@@ -16,8 +16,7 @@ import CaptionRideing from "./pages/CaptionRideing";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // Importing the necessary components for routing;
-
-
+import GoogleAuthSuccess from './pages/GoogleAuthSuccess';
 
 const App = () => {
   return (
@@ -25,16 +24,17 @@ const App = () => {
 
       {/* your routes/components */}
       <ToastContainer position="top-center" autoClose={2000} />
-      
+
       <Routes>
         <Route path="/" element={<Start />} />
         <Route path="/user-signup" element={<UserSignUp />} />
         <Route path="/user-login" element={<UserLogin />} />
-        <Route path="/Home" element={
+        <Route path="/home" element={
           <UserProtectedWrapper>
             <Home />
           </UserProtectedWrapper>
         } />
+        <Route path="/google-auth-success" element={<GoogleAuthSuccess />} />
 
         <Route path='/user-logout' element={
           <UserProtectedWrapper>
