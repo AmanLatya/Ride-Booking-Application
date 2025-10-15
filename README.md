@@ -134,8 +134,8 @@ Frontend/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/online-ride-booking.git
-   cd online-ride-booking
+   git clone https://github.com/AmanLatya/Ride-Booking-Application.git
+   cd Ride-Booking-Application
    ```
 
 2. **Install dependencies**
